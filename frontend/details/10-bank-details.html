@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details - CredNest AI</title>
+    <link rel="stylesheet" href="../css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/loans" class="navbar-link">Back to Loans</a></li>
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 6rem;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h1 class="text-gradient-gold mb-2">🏦 State Bank of India</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 3rem;">
+                Complete loan details and interest rates
+            </p>
+
+            <!-- Bank overview cards -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                <div class="glass-card" style="padding: 2rem;">
+                    <h3>Personal Loan Rate</h3>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--crednest-gold); margin: 1rem 0;">10.5%
+                    </div>
+                    <p style="color: var(--text-muted);">Starting from</p>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem;">
+                    <h3>Processing Fee</h3>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--crednest-blue); margin: 1rem 0;">0.5%
+                    </div>
+                    <p style="color: var(--text-muted);">Of loan amount</p>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem;">
+                    <h3>Max Loan Amount</h3>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--crednest-green); margin: 1rem 0;">₹20L
+                    </div>
+                    <p style="color: var(--text-muted);">Up to</p>
+                </div>
+
+                <div class="glass-card" style="padding: 2rem;">
+                    <h3>Approval Time</h3>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--crednest-purple); margin: 1rem 0;">48
+                        hrs</div>
+                    <p style="color: var(--text-muted);">Quick approval</p>
+                </div>
+            </div>
+
+            <!-- Detailed information -->
+            <div class="glass-card" style="padding: 2.5rem; margin-bottom: 2rem;">
+                <h2 class="mb-3">📋 Loan Features</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 1rem; border-bottom: 1px solid var(--glass-border);">
+                        <i class="fas fa-check-circle" style="color: var(--success); margin-right: 0.5rem;"></i>
+                        <strong>No prepayment charges</strong> - Pay off your loan anytime without penalties
+                    </li>
+                    <li style="padding: 1rem; border-bottom: 1px solid var(--glass-border);">
+                        <i class="fas fa-check-circle" style="color: var(--success); margin-right: 0.5rem;"></i>
+                        <strong>Flexible tenure</strong> - Choose repayment period from 12 to 72 months
+                    </li>
+                    <li style="padding: 1rem; border-bottom: 1px solid var(--glass-border);">
+                        <i class="fas fa-check-circle" style="color: var(--success); margin-right: 0.5rem;"></i>
+                        <strong>Minimal documentation</strong> - Quick and paperless process
+                    </li>
+                    <li style="padding: 1rem;">
+                        <i class="fas fa-check-circle" style="color: var(--success); margin-right: 0.5rem;"></i>
+                        <strong>Special rates for women</strong> - Lower interest rates available
+                    </li>
+                </ul>
+
+                <button class="btn btn-primary" style="width: 100%; margin-top: 2rem;">
+                    <i class="fas fa-arrow-right"></i> Apply Now
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

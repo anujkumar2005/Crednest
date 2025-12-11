@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - CredNest AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <span class="logo">🏦</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html">📊 Dashboard</a></li>
+                <li><a href="chat.html">💬 AI Chat</a></li>
+                <li><a href="budgeting.html">💰 Budgeting</a></li>
+                <li><a href="expenses.html" class="active">📝 Expenses</a></li>
+                <li><a href="loans.html">🏦 Loans</a></li>
+                <li><a href="investments.html">📈 Investments</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-avatar" id="userAvatar" onclick="logout()">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <h1 style="font-size: 2.5em;">Expense Tracker 📝</h1>
+            <button class="btn btn-primary" onclick="showAddExpenseModal()">➕ Add Expense</button>
+        </div>
+
+        <!-- Expense Stats -->
+        <div class="grid grid-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon error">💳</div>
+                <div class="stat-value" id="totalExpenses">₹0</div>
+                <div class="stat-label">Total Expenses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">📊</div>
+                <div class="stat-value" id="expenseCount">0</div>
+                <div class="stat-label">Transactions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon primary">📅</div>
+                <div class="stat-value" id="thisMonth">This Month</div>
+                <div class="stat-label">Period</div>
+            </div>
+        </div>
+
+        <!-- Expenses List -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">📋</span>
+                    Recent Expenses
+                </h3>
+            </div>
+            <div id="expensesList">
+                <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    No expenses yet. Click "Add Expense" to track your first expense.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="addExpenseModal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 500px; width: 90%;">
+            <div class="card-header">
+                <h3 class="card-title">Add New Expense</h3>
+                <button onclick="hideAddExpenseModal()"
+                    style="background: none; border: none; color: var(--text-secondary); font-size: 1.5em; cursor: pointer;">×</button>
+            </div>
+            <form onsubmit="handleAddExpense(event)">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="expenseCategory" required>
+                        <option value="">Select category</option>
+                        <option value="Food">🍔 Food</option>
+                        <option value="Transport">🚗 Transport</option>
+                        <option value="Shopping">🛍️ Shopping</option>
+                        <option value="Entertainment">🎬 Entertainment</option>
+                        <option value="Bills">💡 Bills</option>
+                        <option value="Healthcare">🏥 Healthcare</option>
+                        <option value="Other">📦 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" class="form-input" id="expenseAmount" placeholder="500" required min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" id="expenseDescription" placeholder="Optional description">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" id="expensePayment">
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Net Banking">Net Banking</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="expenseDate" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Add Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        checkAuth();
+
+        async function init() {
+            const user = await loadUserInfo();
+            if (user) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+
+                // Set today's date as default
+                document.getElementById('expenseDate').valueAsDate = new Date();
+
+                loadExpenses();
+            }
+        }
+
+        async function loadExpenses() {
+            try {
+                const data = await api.getExpenses({ limit: 50 });
+                if (data.success) {
+                    document.getElementById('totalExpenses').textContent = formatCurrency(data.total);
+                    document.getElementById('expenseCount').textContent = data.count;
+
+                    if (data.expenses.length > 0) {
+                        displayExpenses(data.expenses);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+            }
+        }
+
+        function displayExpenses(expenses) {
+            const html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Payment</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${expenses.map(exp => `
+                            <tr>
+                                <td>${formatDate(exp.date)}</td>
+                                <td><span class="badge badge-primary">${exp.category}</span></td>
+                                <td>${exp.description || '-'}</td>
+                                <td><span class="badge badge-success">${exp.paymentMethod || 'Cash'}</span></td>
+                                <td style="font-weight: 700; color: var(--error);">-${formatCurrency(exp.amount)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('expensesList').innerHTML = html;
+        }
+
+        function showAddExpenseModal() {
+            document.getElementById('addExpenseModal').classList.remove('hidden');
+        }
+
+        function hideAddExpenseModal() {
+            document.getElementById('addExpenseModal').classList.add('hidden');
+        }
+
+        async function handleAddExpense(event) {
+            event.preventDefault();
+
+            const category = document.getElementById('expenseCategory').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const description = document.getElementById('expenseDescription').value;
+            const paymentMethod = document.getElementById('expensePayment').value;
+            const date = document.getElementById('expenseDate').value;
+
+            try {
+                const data = await api.addExpense({ category, amount, description, paymentMethod, date });
+                if (data.success) {
+                    showAlert('Expense added successfully!', 'success');
+                    hideAddExpenseModal();
+                    event.target.reset();
+                    document.getElementById('expenseDate').valueAsDate = new Date();
+                    loadExpenses();
+                } else {
+                    showAlert(data.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Failed to add expense', 'error');
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

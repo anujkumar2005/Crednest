@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CredNest AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --crednest-gold: #FFD700;
+            --crednest-blue: #00D4FF;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg-hover: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --radius-lg: 16px;
+            --glow-gold: 0 0 20px rgba(255, 215, 0, 0.4);
+            --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+            z-index: 0;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+            z-index: 100;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .navbar-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .navbar-link:hover {
+            color: var(--crednest-gold);
+        }
+
+        .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--crednest-gold);
+        }
+
+        .main-content {
+            position: relative;
+            z-index: 1;
+            margin-top: 80px;
+            padding: 3rem 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--crednest-gold);
+            box-shadow: var(--glow-gold);
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            transition: transform 0.4s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid var(--crednest-gold);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--crednest-gold);
+            font-weight: 600;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--crednest-gold);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+            .navbar-menu {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-logo">
+                <span>🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html" class="navbar-link">Dashboard</a></li>
+                <li><a href="about.html" class="navbar-link">About</a></li>
+                <li><span id="userName" class="navbar-link" style="color: var(--crednest-gold);">User</span></li>
+                <li><button class="btn-secondary" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="welcome-section">
+            <h1>Welcome back, <span id="userNameDisplay">User</span>! 👋</h1>
+            <p>Your intelligent financial assistant is ready to help you achieve your goals</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">Active Features</div>
+                <div class="stat-value">6</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">AI Conversations</div>
+                <div class="stat-value" id="chatCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Financial Health</div>
+                <div class="stat-value">85%</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- AI Chatbot Feature -->
+            <div class="feature-card" onclick="navigateTo('chat.html')">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Loan Assistant</h3>
+                <p>Chat with our Groq-powered AI for instant answers about loans, eligibility, documents, and financial advice. No hardcoded responses—pure intelligence.</p>
+                <span class="feature-tag">✨ Most Popular</span>
+            </div>
+
+            <!-- Budget Tracker -->
+            <div class="feature-card" onclick="navigateTo('budget.html')">
+                <div class="feature-icon">💰</div>
+                <h3>Budget & Expense Tracking</h3>
+                <p>Monitor your monthly income and expenses with smart categorization and visual insights to optimize your spending habits.</p>
+                <span class="feature-tag">📊 Data-Driven</span>
+            </div>
+
+            <!-- Savings Goals -->
+            <div class="feature-card" onclick="navigateTo('savings.html')">
+                <div class="feature-icon">🎯</div>
+                <h3>Savings Goals Tracker</h3>
+                <p>Set savings targets and compare interest rates from top 10 banks to maximize your returns and reach goals faster.</p>
+                <span class="feature-tag">🏦 Top 10 Banks</span>
+            </div>
+
+            <!-- Investment Analysis -->
+            <div class="feature-card" onclick="navigateTo('investment.html')">
+                <div class="feature-icon">📊</div>
+                <h3>Investment Analysis</h3>
+                <p>Analyze and compare top 10 mutual funds with performance metrics, risk ratings, and AI-powered recommendations.</p>
+                <span class="feature-tag">📈 Top 10 Funds</span>
+            </div>
+
+            <!-- Loan Comparison -->
+            <div class="feature-card" onclick="navigateTo('loan-compare.html')">
+                <div class="feature-icon">🏦</div>
+                <h3>Loan Comparison</h3>
+                <p>Compare loan offers from top 20 banks including interest rates, processing fees, tenure, and eligibility criteria.</p>
+                <span class="feature-tag">🔍 Top 20 Banks</span>
+            </div>
+
+            <!-- Insurance Comparison -->
+            <div class="feature-card" onclick="navigateTo('insurance.html')">
+                <div class="feature-icon">🛡️</div>
+                <h3>Insurance Comparison</h3>
+                <p>Evaluate and compare insurance policies from top 10 companies to find the perfect coverage for your family.</p>
+                <span class="feature-tag">🛡️ Top 10 Companies</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    document.getElementById('userName').textContent = userData.name;
+                    document.getElementById('userNameDisplay').textContent = userData.name;
+                } catch (e) {
+                    console.error('Error parsing user data');
+                }
+            }
+        }
+
+        // Navigate to feature page
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            checkAuth();
+            
+            // Simulate chat count (in real app, fetch from backend)
+            const chatCount = localStorage.getItem('chatCount') || 0;
+            document.getElementById('chatCount').textContent = chatCount;
+        };
+    </script>
+</body>
+</html>

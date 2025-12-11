@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - CredNest AI</title>
+    <link rel="stylesheet" href="../css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-container {
+            padding: 6rem 2rem 2rem;
+            min-height: 100vh;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .profile-sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: var(--glow-gold);
+            position: relative;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--crednest-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .avatar-upload:hover {
+            transform: scale(1.1);
+            box-shadow: var(--glow-blue);
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-box {
+            background: var(--bg-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--crednest-gold);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        .profile-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border-radius: var(--radius-sm);
+            position: relative;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-gold);
+            transition: width var(--transition-normal);
+        }
+
+        .tab-btn.active {
+            color: var(--crednest-gold);
+        }
+
+        .tab-btn.active::after {
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+        }
+
+        .edit-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--crednest-gold);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .edit-btn:hover {
+            background: var(--glass-bg-hover);
+            transform: translateX(5px);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .activity-item:hover {
+            background: var(--glass-bg-hover);
+            transform: translateX(5px);
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-gold);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/profile" class="navbar-link">Profile</a></li>
+                <li><button class="btn btn-secondary" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-grid">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-avatar">
+                    👤
+                    <div class="avatar-upload" onclick="uploadAvatar()">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h2 class="profile-name" id="userName">Loading...</h2>
+                    <p class="profile-email" id="userEmail">Loading...</p>
+                    <span
+                        style="display: inline-block; padding: 0.25rem 0.75rem; background: var(--gradient-gold); color: var(--bg-primary); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">
+                        Premium Member
+                    </span>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Total Goals</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">₹0</div>
+                        <div class="stat-label">Saved</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Loans</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Chats</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-top: 2rem;"
+                    onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="profile-content">
+                <h1 class="mb-3">My Profile</h1>
+
+                <div class="section-tabs">
+                    <button class="tab-btn active" onclick="switchTab('personal')">Personal Info</button>
+                    <button class="tab-btn" onclick="switchTab('security')">Security</button>
+                    <button class="tab-btn" onclick="switchTab('activity')">Activity</button>
+                    <button class="tab-btn" onclick="switchTab('preferences')">Preferences</button>
+                </div>
+
+                <!-- Personal Info Tab -->
+                <div class="tab-content active" id="personalTab">
+                    <h3 class="mb-3">Personal Information</h3>
+
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span class="info-value" id="displayName">John Doe</span>
+                            <button class="edit-btn" onclick="editField('name')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Email Address</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span class="info-value" id="displayEmail">john@example.com</span>
+                            <span style="color: var(--success); font-size: 0.875rem;">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Phone Number</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span class="info-value">+91 98765 43210</span>
+                            <button class="edit-btn" onclick="editField('phone')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Date of Birth</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span class="info-value">Not set</span>
+                            <button class="edit-btn" onclick="editField('dob')">
+                                <i class="fas fa-edit"></i> Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span class="info-value">Not set</span>
+                            <button class="edit-btn" onclick="editField('location')">
+                                <i class="fas fa-edit"></i> Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Member Since</span>
+                        <span class="info-value" id="memberSince">January 2025</span>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="tab-content" id="securityTab">
+                    <h3 class="mb-3">Security Settings</h3>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Password</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Last changed 30 days ago
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="changePassword()">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Two-Factor Authentication</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Add extra security to your account
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="enable2FA()">
+                            <i class="fas fa-shield-alt"></i> Enable 2FA
+                        </button>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Active Sessions</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Manage your active sessions
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="viewSessions()">
+                            <i class="fas fa-laptop"></i> View Sessions
+                        </button>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Delete Account</div>
+                            <p style="font-size: 0.875rem; color: var(--error); margin-top: 0.25rem;">
+                                Permanently delete your account and all data
+                            </p>
+                        </div>
+                        <button class="btn btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Tab -->
+                <div class="tab-content" id="activityTab">
+                    <h3 class="mb-3">Recent Activity</h3>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Started AI Chat Session</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: var(--gradient-blue);">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Calculated EMI for Home Loan</div>
+                            <div class="activity-time">5 hours ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: var(--gradient-purple);">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Viewed Budget Summary</div>
+                            <div class="activity-time">1 day ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon"
+                            style="background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Created Savings Goal</div>
+                            <div class="activity-time">2 days ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon"
+                            style="background: linear-gradient(135deg, #FF3B3B 0%, #CC0000 100%);">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Logged in from new device</div>
+                            <div class="activity-time">3 days ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div class="tab-content" id="preferencesTab">
+                    <h3 class="mb-3">Preferences</h3>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Email Notifications</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Receive email updates about your account
+                            </p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked onchange="toggleNotification('email')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">SMS Alerts</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Get SMS alerts for important activities
+                            </p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleNotification('sms')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Marketing Communications</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Receive offers and product updates
+                            </p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleNotification('marketing')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Language</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Choose your preferred language
+                            </p>
+                        </div>
+                        <select class="input-field" style="width: 200px;">
+                            <option>English</option>
+                            <option>हिंदी (Hindi)</option>
+                            <option>தமிழ் (Tamil)</option>
+                        </select>
+                    </div>
+
+                    <div class="info-row">
+                        <div>
+                            <div class="info-label">Currency</div>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Display amounts in
+                            </p>
+                        </div>
+                        <select class="input-field" style="width: 200px;">
+                            <option>₹ INR (Indian Rupee)</option>
+                            <option>$ USD (US Dollar)</option>
+                            <option>€ EUR (Euro)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--glass-border);
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background: var(--gradient-gold);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+
+    <script>
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/auth/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('userName').textContent = data.name;
+                    document.getElementById('userEmail').textContent = data.email;
+                    document.getElementById('displayName').textContent = data.name;
+                    document.getElementById('displayEmail').textContent = data.email;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function editField(field) {
+            alert(`Edit ${field} feature coming soon!`);
+        }
+
+        function uploadAvatar() {
+            alert('Avatar upload feature coming soon!');
+        }
+
+        function changePassword() {
+            alert('Change password feature coming soon!');
+        }
+
+        function enable2FA() {
+            alert('2FA feature coming soon!');
+        }
+
+        function viewSessions() {
+            alert('View sessions feature coming soon!');
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                alert('Account deletion feature coming soon!');
+            }
+        }
+
+        function toggleNotification(type) {
+            console.log(`Toggled ${type} notification`);
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+        loadUserData();
+    </script>
+</body>
+
+</html>

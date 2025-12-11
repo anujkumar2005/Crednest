@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer - CredNest AI</title>
+    <link rel="stylesheet" href="/css/crednest-theme.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        /* Page Header with Gradient */
+        .page-header {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        /* Ultra Premium Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            animation: slideInUp 0.6s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-normal);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--crednest-gold);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-lg);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all var(--transition-normal);
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .stat-icon.gold {
+            background: var(--gradient-gold);
+            box-shadow: var(--glow-gold);
+            color: var(--bg-primary);
+        }
+
+        .stat-icon.blue {
+            background: var(--gradient-blue);
+            box-shadow: var(--glow-blue);
+            color: var(--bg-primary);
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, var(--success) 0%, #00CC70 100%);
+            box-shadow: var(--glow-green);
+            color: var(--bg-primary);
+        }
+
+        .stat-icon.purple {
+            background: var(--gradient-purple);
+            box-shadow: 0 0 20px rgba(183, 148, 246, 0.5);
+            color: var(--bg-primary);
+        }
+
+        .stat-icon.orange {
+            background: linear-gradient(135deg, #FFB800 0%, #FF8C00 100%);
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.5);
+            color: var(--bg-primary);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        /* Premium Controls */
+        .controls {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            animation: slideInUp 0.8s ease;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .controls label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .controls select,
+        .controls input {
+            padding: 0.875rem 1.25rem;
+            background: var(--bg-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all var(--transition-normal);
+            min-width: 200px;
+        }
+
+        .controls select:focus,
+        .controls input:focus {
+            outline: none;
+            border-color: var(--crednest-gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+            background: var(--bg-secondary);
+        }
+
+        .controls-actions {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        /* Ultra Premium Table */
+        .table-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            animation: slideInUp 1s ease;
+        }
+
+        .table-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: var(--glass-bg-hover);
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .table-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border);
+        }
+
+        .table-info i {
+            color: var(--crednest-gold);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .table-container::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: var(--radius-full);
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--crednest-gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        thead {
+            background: var(--glass-bg-hover);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--crednest-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 2px solid var(--glass-border);
+            background: var(--bg-secondary);
+        }
+
+        td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        tbody tr {
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        tbody tr::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--gradient-gold);
+            transform: scaleY(0);
+            transition: transform var(--transition-fast);
+        }
+
+        tbody tr:hover::before {
+            transform: scaleY(1);
+        }
+
+        tbody tr:hover {
+            background: var(--glass-bg-hover);
+            transform: translateX(4px);
+        }
+
+        /* Premium Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge i {
+            font-size: 0.625rem;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+
+        .badge-danger {
+            background: rgba(255, 59, 59, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(255, 59, 59, 0.3);
+            box-shadow: 0 0 10px rgba(255, 59, 59, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--crednest-gold);
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(255, 59, 59, 0.15);
+            border: 1px solid rgba(255, 59, 59, 0.3);
+            color: var(--error);
+            padding: 1.25rem 1.75rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            display: none;
+            animation: slideInDown 0.3s ease;
+        }
+
+        /* Premium Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem;
+            border-top: 1px solid var(--glass-border);
+            background: var(--glass-bg-hover);
+        }
+
+        .pagination button {
+            padding: 0.75rem 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-size: 0.875rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pagination button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .pagination button:hover::before {
+            left: 100%;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--glass-bg-hover);
+            border-color: var(--crednest-gold);
+            transform: translateY(-2px);
+            box-shadow: var(--glow-gold);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: var(--gradient-gold);
+            border-color: var(--crednest-gold);
+            color: var(--bg-primary);
+            box-shadow: var(--glow-gold);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls-actions {
+                margin-left: 0;
+                flex-direction: column;
+            }
+
+            .controls select,
+            .controls input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/budgeting" class="navbar-link">Budgeting</a></li>
+                <li><a href="/admin/db-viewer" class="navbar-link">DB Viewer</a></li>
+                <li><button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">🗄️ Database Viewer</h1>
+            <p class="page-subtitle">Real-time MySQL Database Management & Analytics</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon gold"><i class="fas fa-users"></i></div>
+                <div class="stat-number" id="totalUsers">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-chart-pie"></i></div>
+                <div class="stat-number" id="totalBudgets">-</div>
+                <div class="stat-label">Budget Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-receipt"></i></div>
+                <div class="stat-number" id="totalExpenses">-</div>
+                <div class="stat-label">Expense Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-wallet"></i></div>
+                <div class="stat-number" id="totalIncomes">-</div>
+                <div class="stat-label">Income Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-comments"></i></div>
+                <div class="stat-number" id="totalChats">-</div>
+                <div class="stat-label">Chat Messages</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="tableSelect"><i class="fas fa-table"></i> Select Table</label>
+                <select id="tableSelect">
+                    <option value="users">👥 Users</option>
+                    <option value="budgets">📊 Budgets</option>
+                    <option value="expenses">💸 Expenses</option>
+                    <option value="incomes">💰 Incomes</option>
+                    <option value="chat_history">💬 Chat History</option>
+                    <option value="banks">🏦 Banks</option>
+                    <option value="insurance_companies">🛡️ Insurance Companies</option>
+                    <option value="investment_funds">📈 Investment Funds</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="userFilter"><i class="fas fa-filter"></i> Filter by User</label>
+                <input type="number" id="userFilter" placeholder="Enter User ID">
+            </div>
+
+            <div class="controls-actions">
+                <button class="btn btn-secondary btn-sm" onclick="loadTableData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="exportToCSV()">
+                    <i class="fas fa-download"></i> Export CSV
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="clearFilters()">
+                    <i class="fas fa-times-circle"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div id="errorDisplay" class="error-message"></div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2 id="tableTitle">👥 Users Table</h2>
+                <div class="table-info">
+                    <i class="fas fa-database"></i>
+                    <span id="tableInfo">Loading...</span>
+                </div>
+            </div>
+            <div class="table-container" id="tableContent">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading database records...</p>
+                </div>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </main>
+
+    <script>
+        let currentTable = 'users';
+        let currentPage = 1;
+        let itemsPerPage = 50;
+        let currentData = [];
+
+        const tableIcons = {
+            users: '👥',
+            budgets: '📊',
+            expenses: '💸',
+            incomes: '💰',
+            chat_history: '💬',
+            banks: '🏦',
+            insurance_companies: '🛡️',
+            investment_funds: '📈'
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadStats();
+            loadTableData();
+
+            document.getElementById('tableSelect').addEventListener('change', function () {
+                currentTable = this.value;
+                currentPage = 1;
+                loadTableData();
+            });
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/database/stats');
+                const data = await response.json();
+
+                document.getElementById('totalUsers').textContent = data.users || 0;
+                document.getElementById('totalBudgets').textContent = data.budgets || 0;
+                document.getElementById('totalExpenses').textContent = data.expenses || 0;
+                document.getElementById('totalIncomes').textContent = data.incomes || 0;
+                document.getElementById('totalChats').textContent = data.chat_history || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadTableData() {
+            const tableContent = document.getElementById('tableContent');
+            const tableTitle = document.getElementById('tableTitle');
+            const tableInfo = document.getElementById('tableInfo');
+            const errorDisplay = document.getElementById('errorDisplay');
+
+            tableContent.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Loading database records...</p></div>';
+            errorDisplay.style.display = 'none';
+
+            try {
+                const userFilter = document.getElementById('userFilter').value;
+                let url = `/api/database/table/${currentTable}?page=${currentPage}&limit=${itemsPerPage}`;
+
+                if (userFilter) {
+                    url += `&user_id=${userFilter}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                currentData = data.data || [];
+                const total = data.total || 0;
+
+                const icon = tableIcons[currentTable] || '📋';
+                tableTitle.textContent = `${icon} ${formatTableName(currentTable)}`;
+                tableInfo.textContent = `Showing ${currentData.length} of ${total} records`;
+
+                if (currentData.length === 0) {
+                    tableContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-database"></i>
+                            <h3>No Data Found</h3>
+                            <p>This table is empty or no records match your filter criteria.</p>
+                        </div>
+                    `;
+                } else {
+                    renderTable(currentData);
+                }
+
+                renderPagination(total);
+
+            } catch (error) {
+                errorDisplay.textContent = `⚠️ Error: ${error.message}`;
+                errorDisplay.style.display = 'block';
+                tableContent.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Data</h3></div>';
+            }
+        }
+
+        function renderTable(data) {
+            if (data.length === 0) return;
+
+            const tableContent = document.getElementById('tableContent');
+            const columns = Object.keys(data[0]);
+
+            let html = '<table><thead><tr>';
+            columns.forEach(col => {
+                html += `<th>${formatColumnName(col)}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    html += `<td>${formatCellValue(col, row[col])}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            tableContent.innerHTML = html;
+        }
+
+        function formatTableName(name) {
+            return name.split('_').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        function formatColumnName(name) {
+            return name.split('_').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        function formatCellValue(column, value) {
+            if (value === null || value === undefined) {
+                return '<span style="color: var(--text-muted); font-style: italic;">NULL</span>';
+            }
+
+            if (typeof value === 'boolean') {
+                return value ?
+                    '<span class="badge badge-success"><i class="fas fa-check"></i> Yes</span>' :
+                    '<span class="badge badge-danger"><i class="fas fa-times"></i> No</span>';
+            }
+
+            if (column.includes('amount') || column.includes('income') || column.includes('salary')) {
+                return '<strong style="color: var(--crednest-gold);">₹' + parseFloat(value).toLocaleString('en-IN') + '</strong>';
+            }
+
+            if (column.includes('date') || column.includes('created_at') || column.includes('updated_at')) {
+                return '<span class="badge badge-info"><i class="far fa-clock"></i> ' + new Date(value).toLocaleString('en-IN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) + '</span>';
+            }
+
+            if (column === 'email') {
+                return `<a href="mailto:${value}" style="color: var(--crednest-gold); text-decoration: none;"><i class="fas fa-envelope"></i> ${value}</a>`;
+            }
+
+            if (typeof value === 'string' && value.length > 100) {
+                return '<span title="' + value + '">' + value.substring(0, 100) + '...</span>';
+            }
+
+            return value;
+        }
+
+        function renderPagination(total) {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(total / itemsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})"><i class="fas fa-chevron-left"></i> Previous</button>`;
+
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            if (totalPages > 5) {
+                html += `<button disabled>...</button>`;
+                html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next <i class="fas fa-chevron-right"></i></button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadTableData();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearFilters() {
+            document.getElementById('userFilter').value = '';
+            currentPage = 1;
+            loadTableData();
+        }
+
+        function exportToCSV() {
+            if (currentData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const columns = Object.keys(currentData[0]);
+            let csv = columns.join(',') + '\n';
+
+            currentData.forEach(row => {
+                const values = columns.map(col => {
+                    let value = row[col];
+                    if (value === null || value === undefined) return '';
+                    if (typeof value === 'string' && value.includes(',')) {
+                        return `"${value}"`;
+                    }
+                    return value;
+                });
+                csv += values.join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentTable}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Auto-refresh stats every 30 seconds
+        setInterval(() => {
+            loadStats();
+        }, 30000);
+    </script>
+</body>
+
+</html>

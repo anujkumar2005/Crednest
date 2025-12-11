@@ -1,0 +1,131 @@
+/*
+ * CredNest AI - Responsive Styles
+ * Mobile-first responsive design
+ */
+
+/* ============================================================================
+   MOBILE (up to 768px)
+   ============================================================================ */
+
+@media (max-width: 768px) {
+
+    /* Typography */
+    html {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    /* Navbar */
+    .navbar-container {
+        padding: 0 1rem;
+    }
+
+    .navbar-menu {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 280px;
+        flex-direction: column;
+        background: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        transition: right var(--transition-normal);
+        z-index: 999;
+    }
+
+    .navbar-menu.active {
+        right: 1rem;
+    }
+
+    .navbar-toggle {
+        display: block;
+    }
+
+    /* Container */
+    .container {
+        padding: 0 1rem;
+    }
+
+    /* Grids */
+    .content-grid,
+    .calculator-grid,
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Cards */
+    .overview-cards,
+    .stats-row,
+    .modules-grid,
+    .banks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Chat */
+    .chat-container {
+        grid-template-columns: 1fr;
+    }
+
+    .chat-sidebar {
+        display: none;
+    }
+
+    .message {
+        max-width: 95%;
+    }
+
+    /* Forms */
+    .input-field {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+    }
+
+    /* Buttons */
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Modal */
+    .modal {
+        width: 95%;
+        max-height: 85vh;
+    }
+}
+
+/* ============================================================================
+   TABLET (769px to 1024px)
+   ============================================================================ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .banks-grid,
+    .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   DESKTOP LARGE (1440px+)
+   ============================================================================ */
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1600px;
+    }
+}

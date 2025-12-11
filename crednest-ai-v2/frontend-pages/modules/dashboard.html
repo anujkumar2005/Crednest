@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CredNest AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <span class="logo">🏦</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
+                <li><a href="chat.html">💬 AI Chat</a></li>
+                <li><a href="budgeting.html">💰 Budgeting</a></li>
+                <li><a href="expenses.html">📝 Expenses</a></li>
+                <li><a href="loans.html">🏦 Loans</a></li>
+                <li><a href="investments.html">📈 Investments</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-avatar" id="userAvatar" onclick="logout()">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 style="font-size: 2.5em; margin-bottom: 32px;">
+            Welcome back, <span id="userName">User</span>! 👋
+        </h1>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-4 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon primary">💰</div>
+                <div class="stat-value" id="totalBudget">₹0</div>
+                <div class="stat-label">Total Budget</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">✓</div>
+                <div class="stat-value" id="totalSpent">₹0</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">📊</div>
+                <div class="stat-value" id="remaining">₹0</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon error">💳</div>
+                <div class="stat-value" id="expenseCount">0</div>
+                <div class="stat-label">Expenses</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">💬</span>
+                        AI Assistant
+                    </h3>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Chat with our AI for financial advice, EMI calculations, and loan eligibility checks.
+                </p>
+                <a href="chat.html" class="btn btn-primary">Start Chat</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">💰</span>
+                        Budget Manager
+                    </h3>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Create and manage your monthly budgets across different categories.
+                </p>
+                <a href="budgeting.html" class="btn btn-primary">Manage Budget</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">🏦</span>
+                        Loan Calculator
+                    </h3>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Calculate EMI, compare banks, and check your loan eligibility instantly.
+                </p>
+                <a href="loans.html" class="btn btn-primary">Calculate EMI</a>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">📝</span>
+                    Recent Expenses
+                </h3>
+                <a href="expenses.html" class="btn btn-secondary">View All</a>
+            </div>
+            <div id="recentExpenses">
+                <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    No recent expenses. <a href="expenses.html" style="color: var(--primary);">Add your first
+                        expense</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        checkAuth();
+
+        async function init() {
+            const user = await loadUserInfo();
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+
+                loadDashboardData();
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load budget summary
+                const budgetData = await api.getBudgetSummary();
+                if (budgetData.success) {
+                    const totals = budgetData.totals;
+                    document.getElementById('totalBudget').textContent = formatCurrency(totals.budgeted);
+                    document.getElementById('totalSpent').textContent = formatCurrency(totals.spent);
+                    document.getElementById('remaining').textContent = formatCurrency(totals.remaining);
+                }
+
+                // Load recent expenses
+                const expensesData = await api.getExpenses({ limit: 5 });
+                if (expensesData.success && expensesData.expenses.length > 0) {
+                    document.getElementById('expenseCount').textContent = expensesData.count;
+                    displayRecentExpenses(expensesData.expenses);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function displayRecentExpenses(expenses) {
+            const html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${expenses.map(exp => `
+                            <tr>
+                                <td><span class="badge badge-primary">${exp.category}</span></td>
+                                <td>${exp.description || '-'}</td>
+                                <td style="font-weight: 600;">${formatCurrency(exp.amount)}</td>
+                                <td>${formatDate(exp.date)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('recentExpenses').innerHTML = html;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

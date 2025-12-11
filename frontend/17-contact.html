@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - CredNest AI</title>
+    <link rel="stylesheet" href="css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .contact-container {
+            padding: 6rem 0;
+            min-height: 100vh;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 3rem;
+        }
+
+        .contact-info-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all var(--transition-normal);
+        }
+
+        .contact-info-card:hover {
+            transform: translateX(10px);
+            border-color: var(--crednest-gold);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-gold);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--glow-gold);
+        }
+
+        .contact-form {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/about" class="navbar-link">About</a></li>
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/contact" class="navbar-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="contact-container">
+        <div class="container">
+            <h1 class="text-center text-gradient-gold">Get in Touch</h1>
+            <p class="text-center" style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 3rem;">
+                Have questions? We'd love to hear from you. Send us a message!
+            </p>
+
+            <div class="contact-grid">
+                <div>
+                    <h2 class="mb-3">Contact Information</h2>
+
+                    <div class="contact-info-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3>Email</h3>
+                        <p style="color: var(--text-secondary);">support@crednest.ai</p>
+                    </div>
+
+                    <div class="contact-info-card">
+                        <div class="contact-icon" style="background: var(--gradient-blue);">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h3>Phone</h3>
+                        <p style="color: var(--text-secondary);">+91 98765 43210</p>
+                    </div>
+
+                    <div class="contact-info-card">
+                        <div class="contact-icon" style="background: var(--gradient-purple);">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3>Location</h3>
+                        <p style="color: var(--text-secondary);">Bangalore, Karnataka, India</p>
+                    </div>
+
+                    <div class="contact-info-card">
+                        <div class="contact-icon"
+                            style="background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>Business Hours</h3>
+                        <p style="color: var(--text-secondary);">Monday - Friday: 9 AM - 6 PM IST</p>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <h2 class="mb-3">Send us a Message</h2>
+                    <form onsubmit="handleContactForm(event)">
+                        <div class="input-group">
+                            <label class="input-label">Your Name</label>
+                            <input type="text" class="input-field" placeholder="John Doe" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Email Address</label>
+                            <input type="email" class="input-field" placeholder="john@example.com" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Subject</label>
+                            <input type="text" class="input-field" placeholder="How can we help?" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Message</label>
+                            <textarea class="input-field" rows="6" placeholder="Your message..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleContactForm(e) {
+            e.preventDefault();
+            alert('Thank you! We will get back to you soon.');
+        }
+    </script>
+</body>
+
+</html>

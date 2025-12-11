@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investments - CredNest AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <span class="logo">🏦</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html">📊 Dashboard</a></li>
+                <li><a href="chat.html">💬 AI Chat</a></li>
+                <li><a href="budgeting.html">💰 Budgeting</a></li>
+                <li><a href="expenses.html">📝 Expenses</a></li>
+                <li><a href="loans.html">🏦 Loans</a></li>
+                <li><a href="investments.html" class="active">📈 Investments</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-avatar" id="userAvatar" onclick="logout()">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="font-size: 2.5em; margin-bottom: 32px;">Investment Analysis 📈</h1>
+
+        <!-- Investment Tips -->
+        <div class="grid grid-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">💡</span>
+                        Investment Tips
+                    </h3>
+                </div>
+                <ul style="color: var(--text-secondary); line-height: 1.8;">
+                    <li>Start investing early to benefit from compound interest</li>
+                    <li>Diversify your portfolio across different asset classes</li>
+                    <li>Consider SIP for mutual funds</li>
+                    <li>Review portfolio annually</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">📊</span>
+                        Risk Levels
+                    </h3>
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="badge badge-success">Low</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9em;">Debt Funds, FDs</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="badge badge-warning">Medium</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9em;">Balanced Funds</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="badge badge-error">High</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9em;">Equity Funds</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">🎯</span>
+                        Quick Stats
+                    </h3>
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.9em;">Average Returns</div>
+                        <div style="font-size: 1.5em; font-weight: 700; color: var(--success);">12-15%</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.9em;">Min Investment</div>
+                        <div style="font-size: 1.5em; font-weight: 700; color: var(--primary-light);">₹500</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIP Calculator -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">🧮</span>
+                    SIP Calculator
+                </h3>
+            </div>
+            <div class="grid grid-3">
+                <div class="form-group">
+                    <label class="form-label">Monthly Investment (₹)</label>
+                    <input type="number" class="form-input" id="sipAmount" placeholder="5000" value="5000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expected Return (% p.a.)</label>
+                    <input type="number" step="0.1" class="form-input" id="sipReturn" placeholder="12" value="12">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Period (years)</label>
+                    <input type="number" class="form-input" id="sipYears" placeholder="10" value="10">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="calculateSIP()">Calculate Returns</button>
+
+            <div id="sipResult" class="hidden"
+                style="margin-top: 24px; padding: 24px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div class="grid grid-3">
+                    <div>
+                        <div style="color: var(--text-secondary); margin-bottom: 8px;">Total Investment</div>
+                        <div style="font-size: 1.8em; font-weight: 700; color: var(--primary-light);"
+                            id="totalInvested">₹0</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); margin-bottom: 8px;">Expected Returns</div>
+                        <div style="font-size: 1.8em; font-weight: 700; color: var(--success);" id="expectedReturns">₹0
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); margin-bottom: 8px;">Total Value</div>
+                        <div style="font-size: 1.8em; font-weight: 700; color: var(--warning);" id="totalValue">₹0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Options -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">📊</span>
+                    Popular Investment Options
+                </h3>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Investment Type</th>
+                        <th>Risk Level</th>
+                        <th>Expected Returns</th>
+                        <th>Liquidity</th>
+                        <th>Min Investment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Equity Mutual Funds</strong></td>
+                        <td><span class="badge badge-error">High</span></td>
+                        <td>12-15% p.a.</td>
+                        <td>High</td>
+                        <td>₹500</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debt Mutual Funds</strong></td>
+                        <td><span class="badge badge-success">Low</span></td>
+                        <td>6-8% p.a.</td>
+                        <td>High</td>
+                        <td>₹500</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fixed Deposits</strong></td>
+                        <td><span class="badge badge-success">Low</span></td>
+                        <td>5-7% p.a.</td>
+                        <td>Medium</td>
+                        <td>₹1,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gold</strong></td>
+                        <td><span class="badge badge-warning">Medium</span></td>
+                        <td>8-10% p.a.</td>
+                        <td>High</td>
+                        <td>₹100</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PPF</strong></td>
+                        <td><span class="badge badge-success">Low</span></td>
+                        <td>7-7.5% p.a.</td>
+                        <td>Low</td>
+                        <td>₹500</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stocks</strong></td>
+                        <td><span class="badge badge-error">High</span></td>
+                        <td>15-20% p.a.</td>
+                        <td>High</td>
+                        <td>₹1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        checkAuth();
+
+        async function init() {
+            const user = await loadUserInfo();
+            if (user) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+
+        function calculateSIP() {
+            const monthlyInvestment = parseFloat(document.getElementById('sipAmount').value);
+            const annualReturn = parseFloat(document.getElementById('sipReturn').value);
+            const years = parseInt(document.getElementById('sipYears').value);
+
+            if (!monthlyInvestment || !annualReturn || !years) {
+                showAlert('Please fill all fields', 'error');
+                return;
+            }
+
+            const monthlyRate = annualReturn / 12 / 100;
+            const months = years * 12;
+
+            // SIP Future Value Formula
+            const futureValue = monthlyInvestment * (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate));
+            const totalInvested = monthlyInvestment * months;
+            const returns = futureValue - totalInvested;
+
+            document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
+            document.getElementById('expectedReturns').textContent = formatCurrency(returns);
+            document.getElementById('totalValue').textContent = formatCurrency(futureValue);
+            document.getElementById('sipResult').classList.remove('hidden');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

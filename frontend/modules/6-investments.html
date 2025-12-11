@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investments · CredNest AI</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/crednest-theme.css" />
+    <link rel="stylesheet" href="/css/animations.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        .header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            margin-bottom: 32px;
+        }
+
+        .fund-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+
+        .fund-card {
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fund-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .risk-low {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00FF88;
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .risk-moderate {
+            background: rgba(255, 184, 0, 0.2);
+            color: #FFB800;
+            border: 1px solid rgba(255, 184, 0, 0.4);
+        }
+
+        .risk-high {
+            background: rgba(255, 59, 59, 0.2);
+            color: #FF3B3B;
+            border: 1px solid rgba(255, 59, 59, 0.4);
+        }
+
+        .returns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .return-box {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .calculator-section {
+            margin-top: 48px;
+            padding: 32px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .fund-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1 class="page-title">📈 Investment Portfolio</h1>
+                    <p class="page-subtitle">Track your investments and explore top-performing mutual funds</p>
+                </div>
+            </div>
+
+            <!-- Portfolio Stats -->
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon gold"><i class="fa fa-wallet"></i></div>
+                    <div class="stat-value" id="totalInvested">₹0</div>
+                    <div class="stat-label">Total Invested</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon blue"><i class="fa fa-chart-line"></i></div>
+                    <div class="stat-value" id="currentValue">₹0</div>
+                    <div class="stat-label">Current Value</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon green"><i class="fa fa-arrow-trend-up"></i></div>
+                    <div class="stat-value" id="totalReturns">₹0</div>
+                    <div class="stat-label">Total Returns</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #A78BFA, #F472B6);">
+                        <i class="fa fa-percent"></i>
+                    </div>
+                    <div class="stat-value" id="returnsPct">0%</div>
+                    <div class="stat-label">Returns %</div>
+                </div>
+            </div>
+
+            <!-- Top 10 Mutual Funds -->
+            <div>
+                <h2 class="section-title">🏆 Top 10 Mutual Funds</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Explore high-performing mutual funds with
+                    consistent returns</p>
+
+                <div class="fund-grid" id="fundsGrid">
+                    <div class="glass-card" style="padding: 40px; text-align: center;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: #FFD700;"></i>
+                        <p style="margin-top: 16px; color: rgba(255,255,255,0.7);">Loading fund data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIP Calculator -->
+            <div class="glass-card calculator-section">
+                <h2 class="section-title">🧮 SIP Calculator</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Calculate your SIP returns and plan your
+                    investments</p>
+
+                <div class="calc-grid">
+                    <div>
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Monthly Investment (₹)</label>
+                            <input id="sipAmount" type="number" class="form-input" placeholder="e.g., 5000"
+                                value="5000" />
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Expected Return Rate (% per annum)</label>
+                            <input id="sipRate" type="number" class="form-input" placeholder="e.g., 12" value="12"
+                                step="0.1" />
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Time Period (Years)</label>
+                            <input id="sipYears" type="number" class="form-input" placeholder="e.g., 10" value="10" />
+                        </div>
+
+                        <button id="calculateSIP" class="btn btn-primary" style="width: 100%;">
+                            <i class="fa fa-calculator"></i> Calculate Returns
+                        </button>
+                    </div>
+
+                    <div id="sipResults" style="display: none;">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,212,255,0.1)); padding: 24px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2);">
+                            <h3 style="margin: 0 0 20px 0; text-align: center;">Investment Summary</h3>
+
+                            <div
+                                style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 4px;">Total
+                                    Investment</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #FFD700;" id="sipInvested">₹0
+                                </div>
+                            </div>
+
+                            <div
+                                style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 4px;">
+                                    Estimated Returns</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #00FF88;" id="sipReturns">₹0
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 4px;">Total
+                                    Value</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: #00D4FF;" id="sipTotal">₹0</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px; height: 250px;">
+                            <canvas id="sipChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Utilities
+        const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+
+        // State
+        const state = {
+            funds: []
+        };
+
+        let sipChart;
+
+        // Load Funds
+        const loadFunds = async () => {
+            // Mock data - replace with API call
+            state.funds = [
+                { fund_name: 'SBI Bluechip Fund', fund_type: 'Large Cap Equity', amc_name: 'SBI Mutual Fund', nav: 72.45, returns_1yr: 18.5, returns_3yr: 22.3, returns_5yr: 19.8, expense_ratio: 0.68, min_sip: 500, risk_level: 'Moderate', rating: 4.5 },
+                { fund_name: 'HDFC Top 100 Fund', fund_type: 'Large Cap Equity', amc_name: 'HDFC Mutual Fund', nav: 845.32, returns_1yr: 19.2, returns_3yr: 23.1, returns_5yr: 20.5, expense_ratio: 0.85, min_sip: 500, risk_level: 'Moderate', rating: 4.7 },
+                { fund_name: 'ICICI Prudential Bluechip Fund', fund_type: 'Large Cap Equity', amc_name: 'ICICI Prudential MF', nav: 98.76, returns_1yr: 17.8, returns_3yr: 21.5, returns_5yr: 19.2, expense_ratio: 0.92, min_sip: 100, risk_level: 'Moderate', rating: 4.6 },
+                { fund_name: 'Axis Midcap Fund', fund_type: 'Mid Cap Equity', amc_name: 'Axis Mutual Fund', nav: 95.23, returns_1yr: 25.4, returns_3yr: 28.7, returns_5yr: 24.3, expense_ratio: 0.75, min_sip: 500, risk_level: 'High', rating: 4.8 },
+                { fund_name: 'Kotak Emerging Equity Fund', fund_type: 'Mid Cap Equity', amc_name: 'Kotak Mahindra MF', nav: 78.54, returns_1yr: 24.1, returns_3yr: 27.3, returns_5yr: 23.5, expense_ratio: 0.88, min_sip: 1000, risk_level: 'High', rating: 4.7 },
+                { fund_name: 'Parag Parikh Flexi Cap Fund', fund_type: 'Flexi Cap Equity', amc_name: 'PPFAS Mutual Fund', nav: 68.92, returns_1yr: 21.3, returns_3yr: 25.8, returns_5yr: 22.1, expense_ratio: 0.68, min_sip: 1000, risk_level: 'Moderate', rating: 4.9 },
+                { fund_name: 'Mirae Asset Large Cap Fund', fund_type: 'Large Cap Equity', amc_name: 'Mirae Asset MF', nav: 92.15, returns_1yr: 20.5, returns_3yr: 24.2, returns_5yr: 21.3, expense_ratio: 0.52, min_sip: 1000, risk_level: 'Moderate', rating: 4.7 },
+                { fund_name: 'SBI Small Cap Fund', fund_type: 'Small Cap Equity', amc_name: 'SBI Mutual Fund', nav: 125.67, returns_1yr: 28.9, returns_3yr: 32.4, returns_5yr: 26.8, expense_ratio: 0.85, min_sip: 500, risk_level: 'Very High', rating: 4.6 },
+                { fund_name: 'HDFC Hybrid Equity Fund', fund_type: 'Hybrid - Aggressive', amc_name: 'HDFC Mutual Fund', nav: 115.43, returns_1yr: 16.2, returns_3yr: 19.5, returns_5yr: 17.8, expense_ratio: 0.95, min_sip: 500, risk_level: 'Moderate', rating: 4.5 },
+                { fund_name: 'UTI Nifty Index Fund', fund_type: 'Index Fund', amc_name: 'UTI Mutual Fund', nav: 158.92, returns_1yr: 17.5, returns_3yr: 20.8, returns_5yr: 18.9, expense_ratio: 0.20, min_sip: 500, risk_level: 'Moderate', rating: 4.4 }
+            ];
+            renderFunds();
+        };
+
+        // Render Funds
+        const renderFunds = () => {
+            const grid = document.getElementById('fundsGrid');
+            grid.innerHTML = '';
+
+            state.funds.forEach(fund => {
+                const riskClass = fund.risk_level.toLowerCase().includes('high') ? 'risk-high' :
+                    fund.risk_level.toLowerCase().includes('moderate') ? 'risk-moderate' : 'risk-low';
+
+                const card = document.createElement('div');
+                card.className = 'glass-card fund-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;">${fund.fund_name}</h3>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 8px;">${fund.amc_name}</div>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <span class="risk-badge ${riskClass}">${fund.risk_level}</span>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                                    ${'⭐'.repeat(Math.round(fund.rating))}
+                                </span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">NAV</div>
+                            <div style="font-size: 1.3rem; font-weight: 700; color: #FFD700;">₹${fund.nav}</div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 16px 0;">
+                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">${fund.fund_type}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Min SIP</span>
+                            <span style="font-weight: 600; color: #00D4FF;">₹${fund.min_sip}/month</span>
+                        </div>
+                    </div>
+
+                    <div class="returns-grid">
+                        <div class="return-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">1 Year</div>
+                            <div style="font-weight: 700; color: ${fund.returns_1yr >= 15 ? '#00FF88' : '#FFB800'};">${fund.returns_1yr}%</div>
+                        </div>
+                        <div class="return-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">3 Year</div>
+                            <div style="font-weight: 700; color: ${fund.returns_3yr >= 20 ? '#00FF88' : '#FFB800'};">${fund.returns_3yr}%</div>
+                        </div>
+                        <div class="return-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">5 Year</div>
+                            <div style="font-weight: 700; color: ${fund.returns_5yr >= 18 ? '#00FF88' : '#FFB800'};">${fund.returns_5yr}%</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Expense Ratio: ${fund.expense_ratio}%</span>
+                        <button class="btn btn-sm btn-primary" onclick="alert('Investment feature coming soon!')">
+                            <i class="fa fa-plus"></i> Invest
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        // SIP Calculator
+        document.getElementById('calculateSIP').onclick = () => {
+            const monthlyAmount = parseFloat(document.getElementById('sipAmount').value) || 0;
+            const annualRate = parseFloat(document.getElementById('sipRate').value) || 0;
+            const years = parseFloat(document.getElementById('sipYears').value) || 0;
+
+            if (monthlyAmount <= 0 || annualRate <= 0 || years <= 0) {
+                alert('Please enter valid values');
+                return;
+            }
+
+            const months = years * 12;
+            const monthlyRate = annualRate / 12 / 100;
+
+            // Future Value of SIP formula
+            const futureValue = monthlyAmount * (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate));
+            const invested = monthlyAmount * months;
+            const returns = futureValue - invested;
+
+            document.getElementById('sipInvested').textContent = fmtINR(invested);
+            document.getElementById('sipReturns').textContent = fmtINR(returns);
+            document.getElementById('sipTotal').textContent = fmtINR(futureValue);
+            document.getElementById('sipResults').style.display = 'block';
+
+            // Chart
+            const ctx = document.getElementById('sipChart');
+            if (sipChart) sipChart.destroy();
+
+            sipChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Invested Amount', 'Estimated Returns'],
+                    datasets: [{
+                        data: [invested, returns],
+                        backgroundColor: ['#FFD700', '#00FF88'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        };
+
+        // Initialize
+        loadFunds();
+    </script>
+</body>
+
+</html>

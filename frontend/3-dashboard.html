@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CredNest AI</title>
+    <link rel="stylesheet" href="css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Dashboard-specific styles */
+        .dashboard-container {
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .dashboard-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid var(--glass-border);
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .module-card {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform var(--transition-normal);
+        }
+
+        .module-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .module-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--crednest-gold);
+        }
+
+        .module-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all var(--transition-normal);
+        }
+
+        .module-card:hover .module-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .module-card.budgeting .module-icon {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            box-shadow: var(--glow-gold);
+        }
+
+        .module-card.savings .module-icon {
+            background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);
+            box-shadow: var(--glow-green);
+        }
+
+        .module-card.investments .module-icon {
+            background: linear-gradient(135deg, #00D4FF 0%, #0080FF 100%);
+            box-shadow: var(--glow-blue);
+        }
+
+        .module-card.loans .module-icon {
+            background: linear-gradient(135deg, #B794F6 0%, #8B5CF6 100%);
+            box-shadow: 0 0 20px rgba(183, 148, 246, 0.5);
+        }
+
+        .module-card.insurance .module-icon {
+            background: linear-gradient(135deg, #FF3B3B 0%, #CC0000 100%);
+            box-shadow: 0 0 20px rgba(255, 59, 59, 0.5);
+        }
+
+        .module-card.chat .module-icon {
+            background: linear-gradient(135deg, #FFB800 0%, #FF8C00 100%);
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.5);
+        }
+
+        .module-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .module-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .module-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .module-features li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .module-features li i {
+            color: var(--crednest-gold);
+        }
+
+        .module-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--crednest-gold);
+            font-weight: 600;
+            transition: gap var(--transition-fast);
+        }
+
+        .module-card:hover .module-action {
+            gap: 1rem;
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/profile" class="navbar-link">Profile</a></li>
+                <li><a href="/contact" class="navbar-link">Contact</a></li>
+                <li><button class="btn btn-secondary" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="container">
+                <div class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Welcome back, <span class="text-gradient-gold" id="userName">User</span>! 👋</h1>
+                        <p>Your smart financial companion is ready to help you manage your money better</p>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">₹0</div>
+                            <div class="stat-label">Total Budget</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">₹0</div>
+                            <div class="stat-label">Savings</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Active Goals</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules Grid -->
+        <div class="container">
+            <h2 class="text-center mb-4">💰 Money Management Modules</h2>
+            <div class="modules-grid">
+                <!-- Budgeting Module -->
+                <div class="module-card budgeting" onclick="navigateTo('budgeting')">
+                    <div class="module-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="module-title">Budgeting</h3>
+                    <p class="module-description">Track income & expenses, allocate funds wisely</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Monthly budget planning</li>
+                        <li><i class="fas fa-check-circle"></i> Expense categorization</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time spending alerts</li>
+                        <li><i class="fas fa-check-circle"></i> Visual spending graphs</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Start Budgeting</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Savings Module -->
+                <div class="module-card savings" onclick="navigateTo('savings')">
+                    <span class="featured-badge">Top 10 Banks</span>
+                    <div class="module-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <h3 class="module-title">Savings</h3>
+                    <p class="module-description">Build an emergency fund and reach goals</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Set savings goals</li>
+                        <li><i class="fas fa-check-circle"></i> Top 10 banks comparison</li>
+                        <li><i class="fas fa-check-circle"></i> Live interest rates</li>
+                        <li><i class="fas fa-check-circle"></i> Best savings schemes</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Explore Savings</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Investments Module -->
+                <div class="module-card investments" onclick="navigateTo('investments')">
+                    <span class="featured-badge">Top 10 Funds</span>
+                    <div class="module-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="module-title">Investing</h3>
+                    <p class="module-description">Grow wealth over time</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Mutual funds analysis</li>
+                        <li><i class="fas fa-check-circle"></i> SIP calculator</li>
+                        <li><i class="fas fa-check-circle"></i> Top 10 funds with returns</li>
+                        <li><i class="fas fa-check-circle"></i> Live NAV updates</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Start Investing</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Loans Module -->
+                <div class="module-card loans" onclick="navigateTo('loans')">
+                    <span class="featured-badge">Top 20 Banks</span>
+                    <div class="module-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h3 class="module-title">Borrowing / Loans</h3>
+                    <p class="module-description">Manage credit responsibly</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Compare 20+ banks</li>
+                        <li><i class="fas fa-check-circle"></i> EMI calculator</li>
+                        <li><i class="fas fa-check-circle"></i> Eligibility checker</li>
+                        <li><i class="fas fa-check-circle"></i> Live interest rates</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Compare Loans</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Insurance Module -->
+                <div class="module-card insurance" onclick="navigateTo('insurance')">
+                    <span class="featured-badge">Top 10 Companies</span>
+                    <div class="module-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="module-title">Protection / Insurance</h3>
+                    <p class="module-description">Safeguard against risks</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Life & health insurance</li>
+                        <li><i class="fas fa-check-circle"></i> Top 10 companies</li>
+                        <li><i class="fas fa-check-circle"></i> Premium calculator</li>
+                        <li><i class="fas fa-check-circle"></i> Claim settlement ratio</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Get Protected</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- AI Chat Module -->
+                <div class="module-card chat" onclick="navigateTo('chat')">
+                    <span class="featured-badge">AI Powered</span>
+                    <div class="module-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="module-title">AI Loan Assistant</h3>
+                    <p class="module-description">Get instant loan guidance</p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Loan eligibility check</li>
+                        <li><i class="fas fa-check-circle"></i> Application guidance</li>
+                        <li><i class="fas fa-check-circle"></i> Financial literacy tips</li>
+                        <li><i class="fas fa-check-circle"></i> 24/7 AI support</li>
+                    </ul>
+                    <div class="module-action">
+                        <span>Chat with AI</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>CredNest AI</h4>
+                    <p>Your smart financial companion for better money management</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li>Email: support@crednest.ai</li>
+                        <li>Phone: +91 98765 43210</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CredNest AI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Load user data
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/auth/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('userName').textContent = data.name;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Navigate to module
+        function navigateTo(module) {
+            window.location.href = `/${module}`;
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Load data on page load
+        loadUserData();
+    </script>
+</body>
+
+</html>

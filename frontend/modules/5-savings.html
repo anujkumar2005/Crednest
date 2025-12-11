@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Savings Goals · CredNest AI</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/crednest-theme.css" />
+    <link rel="stylesheet" href="/css/animations.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        .header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .cards {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .goal-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 16px;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .bank-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            margin-top: 24px;
+        }
+
+        .bank-card {
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .bank-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+        }
+
+        .rate-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0A0A0A;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .bank-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1 class="page-title">💰 Savings Goals</h1>
+                    <p class="page-subtitle">Build your emergency fund and achieve financial milestones</p>
+                </div>
+                <button id="btnAddGoal" class="btn btn-primary">
+                    <i class="fa fa-plus"></i> New Goal
+                </button>
+            </div>
+
+            <!-- Goals Grid -->
+            <div class="cards" id="goalsGrid"></div>
+            <div id="emptyGoals" class="glass-card" style="padding: 40px; text-align: center; display: none;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🎯</div>
+                <h3>No Savings Goals Yet</h3>
+                <p style="color: rgba(255,255,255,0.7); margin: 12px 0 24px;">Start building your financial future by
+                    creating your first savings goal!</p>
+                <button onclick="document.getElementById('btnAddGoal').click()" class="btn btn-primary">
+                    <i class="fa fa-plus"></i> Create Your First Goal
+                </button>
+            </div>
+
+            <!-- Top 10 Banks Section -->
+            <div style="margin-top: 48px;">
+                <h2 class="section-title">🏦 Top 10 Banks - Savings Rates</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Compare the best savings and FD rates from
+                    leading Indian banks</p>
+
+                <div class="bank-grid" id="banksGrid">
+                    <div class="glass-card" style="padding: 40px; text-align: center;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: #FFD700;"></i>
+                        <p style="margin-top: 16px; color: rgba(255,255,255,0.7);">Loading bank data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Goal Modal -->
+    <div id="modalBackdrop" class="modal-backdrop">
+        <div class="glass-card modal">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+                <h3 id="modalTitle" style="margin:0">Add Savings Goal</h3>
+                <button id="modalClose" class="btn btn-sm btn-secondary"><i class="fa fa-times"></i></button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Utilities
+        const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+        const parseAmount = val => {
+            if (typeof val === 'number') return val;
+            const num = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+            return isNaN(num) ? 0 : num;
+        };
+        const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+        // State
+        const state = {
+            goals: JSON.parse(localStorage.getItem('crednest:savings:goals') || '[]'),
+            banks: []
+        };
+
+        const saveGoals = () => {
+            localStorage.setItem('crednest:savings:goals', JSON.stringify(state.goals));
+        };
+
+        // Fetch banks from API
+        const loadBanks = async () => {
+            try {
+                // For now, use mock data. Replace with actual API call
+                state.banks = [
+                    { name: 'IDFC FIRST Bank', savings_rate: 7.00, fd_rate: 7.50, rating: 4.4 },
+                    { name: 'IndusInd Bank', savings_rate: 4.00, fd_rate: 7.25, rating: 4.5 },
+                    { name: 'Kotak Mahindra Bank', savings_rate: 3.50, fd_rate: 7.10, rating: 4.6 },
+                    { name: 'Yes Bank', savings_rate: 3.25, fd_rate: 7.25, rating: 4.1 },
+                    { name: 'HDFC Bank', savings_rate: 3.00, fd_rate: 7.00, rating: 4.7 },
+                    { name: 'ICICI Bank', savings_rate: 3.00, fd_rate: 6.70, rating: 4.6 },
+                    { name: 'Axis Bank', savings_rate: 3.00, fd_rate: 7.00, rating: 4.5 },
+                    { name: 'Federal Bank', savings_rate: 3.00, fd_rate: 7.00, rating: 4.4 },
+                    { name: 'Bandhan Bank', savings_rate: 3.00, fd_rate: 7.00, rating: 4.3 },
+                    { name: 'Canara Bank', savings_rate: 2.90, fd_rate: 6.70, rating: 4.3 }
+                ];
+                renderBanks();
+            } catch (error) {
+                console.error('Error loading banks:', error);
+            }
+        };
+
+        // Render Goals
+        const renderGoals = () => {
+            const grid = document.getElementById('goalsGrid');
+            const empty = document.getElementById('emptyGoals');
+
+            if (!state.goals.length) {
+                grid.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            empty.style.display = 'none';
+            grid.innerHTML = '';
+
+            state.goals.forEach(goal => {
+                const progress = goal.target_amount > 0 ? Math.min(100, (goal.current_amount / goal.target_amount) * 100) : 0;
+                const remaining = Math.max(0, goal.target_amount - goal.current_amount);
+                const circumference = 2 * Math.PI * 50;
+                const offset = circumference - (progress / 100) * circumference;
+
+                const card = document.createElement('div');
+                card.className = 'glass-card goal-card';
+                card.innerHTML = `
+                    <div style="padding: 24px;">
+                        <div class="goal-icon">${goal.icon || '💰'}</div>
+                        <h3 style="margin: 0 0 8px 0;">${goal.goal_name}</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px;">
+                            ${goal.target_date ? `Target: ${new Date(goal.target_date).toLocaleDateString('en-IN')}` : 'No deadline'}
+                        </p>
+
+                        <svg class="progress-ring" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.1)" />
+                            <circle cx="60" cy="60" r="50" 
+                                stroke="url(#gradient-${goal.id})" 
+                                stroke-dasharray="${circumference}" 
+                                stroke-dashoffset="${offset}"
+                                stroke-linecap="round" />
+                            <defs>
+                                <linearGradient id="gradient-${goal.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FFD700" />
+                                    <stop offset="100%" style="stop-color:#00D4FF" />
+                                </linearGradient>
+                            </defs>
+                            <text x="60" y="60" text-anchor="middle" dy="7" 
+                                style="font-size: 20px; font-weight: 700; fill: #FFD700;">
+                                ${Math.round(progress)}%
+                            </text>
+                        </svg>
+
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #00FF88;">
+                                ${fmtINR(goal.current_amount)}
+                            </div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                                of ${fmtINR(goal.target_amount)}
+                            </div>
+                            <div style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 4px;">
+                                ${fmtINR(remaining)} remaining
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-sm btn-primary" style="flex: 1;" onclick="addMoney('${goal.id}')">
+                                <i class="fa fa-plus"></i> Add Money
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="editGoal('${goal.id}')">
+                                <i class="fa fa-pen"></i>
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="deleteGoal('${goal.id}')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        // Render Banks
+        const renderBanks = () => {
+            const grid = document.getElementById('banksGrid');
+            grid.innerHTML = '';
+
+            state.banks.forEach(bank => {
+                const card = document.createElement('div');
+                card.className = 'glass-card bank-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0;">${bank.name}</h3>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                                ${'⭐'.repeat(Math.round(bank.rating))} ${bank.rating}/5
+                            </div>
+                        </div>
+                        <div class="rate-badge">${bank.savings_rate}%</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+                        <div style="padding: 12px; background: rgba(255,215,0,0.1); border-radius: 8px; border: 1px solid rgba(255,215,0,0.2);">
+                            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Savings Rate</div>
+                            <div style="font-size: 1.3rem; font-weight: 700; color: #FFD700;">${bank.savings_rate}%</div>
+                        </div>
+                        <div style="padding: 12px; background: rgba(0,212,255,0.1); border-radius: 8px; border: 1px solid rgba(0,212,255,0.2);">
+                            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">FD Rate</div>
+                            <div style="font-size: 1.3rem; font-weight: 700; color: #00D4FF;">${bank.fd_rate}%</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        // Modal Functions
+        const backdrop = document.getElementById('modalBackdrop');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        document.getElementById('modalClose').onclick = () => backdrop.style.display = 'none';
+
+        const openModal = (title, html, onMount) => {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = html;
+            backdrop.style.display = 'flex';
+            onMount && onMount();
+        };
+
+        // Add/Edit Goal
+        window.editGoal = (id = null) => {
+            const goal = id ? state.goals.find(g => g.id === id) : {
+                goal_name: '',
+                target_amount: '',
+                current_amount: 0,
+                target_date: '',
+                icon: '💰'
+            };
+
+            const icons = ['💰', '🏠', '🚗', '✈️', '🎓', '💍', '🏖️', '📱', '🎯', '⭐'];
+
+            openModal(id ? 'Edit Goal' : 'Add Savings Goal', `
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label class="form-label">Goal Name</label>
+                        <input id="goalName" class="form-input" placeholder="e.g., Emergency Fund" value="${goal.goal_name}" />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label class="form-label">Target Amount (₹)</label>
+                            <input id="goalTarget" class="form-input" placeholder="e.g., 500000" value="${goal.target_amount}" />
+                        </div>
+                        <div>
+                            <label class="form-label">Current Amount (₹)</label>
+                            <input id="goalCurrent" class="form-input" placeholder="e.g., 50000" value="${goal.current_amount}" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Target Date (Optional)</label>
+                        <input id="goalDate" type="date" class="form-input" value="${goal.target_date || ''}" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Choose Icon</label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${icons.map(icon => `
+                                <button type="button" class="icon-btn ${goal.icon === icon ? 'active' : ''}" 
+                                    data-icon="${icon}" 
+                                    style="font-size: 2rem; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid ${goal.icon === icon ? '#FFD700' : 'transparent'}; border-radius: 8px; cursor: pointer;">
+                                    ${icon}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+                        <button id="saveGoal" class="btn btn-primary">Save Goal</button>
+                    </div>
+                </div>
+            `, () => {
+                let selectedIcon = goal.icon || '💰';
+
+                document.querySelectorAll('.icon-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        document.querySelectorAll('.icon-btn').forEach(b => b.style.borderColor = 'transparent');
+                        btn.style.borderColor = '#FFD700';
+                        selectedIcon = btn.getAttribute('data-icon');
+                    };
+                });
+
+                document.getElementById('saveGoal').onclick = () => {
+                    const name = document.getElementById('goalName').value.trim();
+                    const target = parseAmount(document.getElementById('goalTarget').value);
+                    const current = parseAmount(document.getElementById('goalCurrent').value);
+                    const date = document.getElementById('goalDate').value;
+
+                    if (!name || target <= 0) {
+                        alert('Please enter a valid goal name and target amount');
+                        return;
+                    }
+
+                    if (id) {
+                        const ref = state.goals.find(g => g.id === id);
+                        ref.goal_name = name;
+                        ref.target_amount = target;
+                        ref.current_amount = current;
+                        ref.target_date = date;
+                        ref.icon = selectedIcon;
+                    } else {
+                        state.goals.push({
+                            id: genId(),
+                            goal_name: name,
+                            target_amount: target,
+                            current_amount: current,
+                            target_date: date,
+                            icon: selectedIcon,
+                            status: 'active'
+                        });
+                    }
+
+                    saveGoals();
+                    renderGoals();
+                    backdrop.style.display = 'none';
+                };
+            });
+        };
+
+        // Add Money to Goal
+        window.addMoney = (id) => {
+            const goal = state.goals.find(g => g.id === id);
+            if (!goal) return;
+
+            openModal('Add Money to Goal', `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 3rem; margin-bottom: 8px;">${goal.icon}</div>
+                    <h3 style="margin: 0;">${goal.goal_name}</h3>
+                    <p style="color: rgba(255,255,255,0.6);">Current: ${fmtINR(goal.current_amount)}</p>
+                </div>
+
+                <div>
+                    <label class="form-label">Amount to Add (₹)</label>
+                    <input id="addAmount" class="form-input" placeholder="e.g., 10000" autofocus />
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px;">
+                    <button id="confirmAdd" class="btn btn-primary">Add Money</button>
+                </div>
+            `, () => {
+                document.getElementById('confirmAdd').onclick = () => {
+                    const amount = parseAmount(document.getElementById('addAmount').value);
+                    if (amount <= 0) {
+                        alert('Please enter a valid amount');
+                        return;
+                    }
+
+                    goal.current_amount += amount;
+                    saveGoals();
+                    renderGoals();
+                    backdrop.style.display = 'none';
+                };
+            });
+        };
+
+        // Delete Goal
+        window.deleteGoal = (id) => {
+            if (!confirm('Are you sure you want to delete this goal?')) return;
+            state.goals = state.goals.filter(g => g.id !== id);
+            saveGoals();
+            renderGoals();
+        };
+
+        // Initialize
+        document.getElementById('btnAddGoal').onclick = () => editGoal();
+        loadBanks();
+        renderGoals();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loans - CredNest AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <span class="logo">🏦</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html">📊 Dashboard</a></li>
+                <li><a href="chat.html">💬 AI Chat</a></li>
+                <li><a href="budgeting.html">💰 Budgeting</a></li>
+                <li><a href="expenses.html">📝 Expenses</a></li>
+                <li><a href="loans.html" class="active">🏦 Loans</a></li>
+                <li><a href="investments.html">📈 Investments</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-avatar" id="userAvatar" onclick="logout()">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="font-size: 2.5em; margin-bottom: 32px;">Loan Calculator & Banks 🏦</h1>
+
+        <div class="grid grid-2 mb-4">
+            <!-- EMI Calculator -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">🧮</span>
+                        EMI Calculator
+                    </h3>
+                </div>
+                <form onsubmit="calculateEMI(event)">
+                    <div class="form-group">
+                        <label class="form-label">Loan Amount (₹)</label>
+                        <input type="number" class="form-input" id="loanAmount" placeholder="500000" required
+                            min="1000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Interest Rate (% per annum)</label>
+                        <input type="number" step="0.01" class="form-input" id="interestRate" placeholder="10.5"
+                            required min="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Loan Tenure (months)</label>
+                        <input type="number" class="form-input" id="loanTenure" placeholder="60" required min="1">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Calculate EMI</button>
+                </form>
+
+                <div id="emiResult" class="hidden"
+                    style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color);">
+                    <h4 style="margin-bottom: 16px; color: var(--primary-light);">Calculation Results</h4>
+                    <div style="display: grid; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Monthly EMI:</span>
+                            <strong id="emiValue" style="color: var(--primary-light);">₹0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total Amount:</span>
+                            <strong id="totalAmount">₹0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total Interest:</span>
+                            <strong id="totalInterest" style="color: var(--warning);">₹0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eligibility Checker -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="card-icon">✅</span>
+                        Eligibility Checker
+                    </h3>
+                </div>
+                <form onsubmit="checkEligibility(event)">
+                    <div class="form-group">
+                        <label class="form-label">Monthly Income (₹)</label>
+                        <input type="number" class="form-input" id="monthlyIncome" placeholder="50000" required
+                            min="1000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Desired Loan Amount (₹)</label>
+                        <input type="number" class="form-input" id="desiredLoan" placeholder="1000000" required
+                            min="1000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CIBIL Score (optional)</label>
+                        <input type="number" class="form-input" id="cibilScore" placeholder="750" min="300" max="900">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Check Eligibility</button>
+                </form>
+
+                <div id="eligibilityResult" class="hidden" style="margin-top: 24px;"></div>
+            </div>
+        </div>
+
+        <!-- Banks List -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">🏦</span>
+                    Top Banks in India
+                </h3>
+                <select class="form-select" style="width: 200px;" onchange="filterBanks(this.value)">
+                    <option value="">All Loan Types</option>
+                    <option value="home">Home Loan</option>
+                    <option value="personal">Personal Loan</option>
+                    <option value="car">Car Loan</option>
+                    <option value="education">Education Loan</option>
+                </select>
+            </div>
+            <div id="banksList">
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="color: var(--text-secondary); margin-top: 16px;">Loading banks...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        checkAuth();
+
+        async function init() {
+            const user = await loadUserInfo();
+            if (user) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+                loadBanks();
+            }
+        }
+
+        async function calculateEMI(event) {
+            event.preventDefault();
+
+            const principal = parseFloat(document.getElementById('loanAmount').value);
+            const rate = parseFloat(document.getElementById('interestRate').value);
+            const tenure = parseInt(document.getElementById('loanTenure').value);
+
+            try {
+                const data = await api.calculateEMI(principal, rate, tenure);
+                if (data.success) {
+                    const calc = data.calculation;
+                    document.getElementById('emiValue').textContent = formatCurrency(calc.emi);
+                    document.getElementById('totalAmount').textContent = formatCurrency(calc.totalAmount);
+                    document.getElementById('totalInterest').textContent = formatCurrency(calc.totalInterest);
+                    document.getElementById('emiResult').classList.remove('hidden');
+                }
+            } catch (error) {
+                showAlert('Failed to calculate EMI', 'error');
+            }
+        }
+
+        async function checkEligibility(event) {
+            event.preventDefault();
+
+            const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+            const loanAmount = parseFloat(document.getElementById('desiredLoan').value);
+            const cibilScore = parseInt(document.getElementById('cibilScore').value) || 750;
+
+            try {
+                const data = await api.checkLoanEligibility(monthlyIncome, loanAmount, cibilScore);
+                if (data.success) {
+                    const elig = data.eligibility;
+                    const resultDiv = document.getElementById('eligibilityResult');
+                    const statusClass = elig.eligible ? 'success' : 'error';
+                    const statusIcon = elig.eligible ? '✅' : '❌';
+
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-${statusClass}">
+                            <h4 style="margin-bottom: 8px;">${statusIcon} ${elig.status === 'approved' ? 'Eligible!' : 'Not Eligible'}</h4>
+                            <p>${elig.recommendation}</p>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+                                <small>Max Eligible: ${formatCurrency(elig.maxEligibleAmount)}</small>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                showAlert('Failed to check eligibility', 'error');
+            }
+        }
+
+        async function loadBanks(loanType = null) {
+            try {
+                const data = await api.getBanks(loanType);
+                if (data.success) {
+                    displayBanks(data.banks, loanType);
+                }
+            } catch (error) {
+                console.error('Error loading banks:', error);
+            }
+        }
+
+        function displayBanks(banks, loanType) {
+            const getRateField = (bank, type) => {
+                if (!type) return bank.homeLoanRate || bank.personalLoanRate || '-';
+                const field = `${type}LoanRate`;
+                return bank[field] || '-';
+            };
+
+            const html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bank Name</th>
+                            <th>Interest Rate</th>
+                            <th>Processing Fee</th>
+                            <th>Min CIBIL</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${banks.map(bank => `
+                            <tr>
+                                <td style="font-weight: 600;">${bank.name}</td>
+                                <td><span class="badge badge-success">${getRateField(bank, loanType)}%</span></td>
+                                <td>${bank.processingFee ? bank.processingFee + '%' : '-'}</td>
+                                <td>${bank.minCibilScore || '-'}</td>
+                                <td>
+                                    <span style="color: var(--warning);">
+                                        ${'⭐'.repeat(Math.floor(bank.rating || 0))}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('banksList').innerHTML = html;
+        }
+
+        function filterBanks(loanType) {
+            loadBanks(loanType || null);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

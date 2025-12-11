@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insurance · CredNest AI</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/crednest-theme.css" />
+    <link rel="stylesheet" href="/css/animations.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        .header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .company-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        }
+
+        .company-card {
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .company-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+        }
+
+        .claim-ratio {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2));
+            border-radius: 24px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #00FF88;
+        }
+
+        .premium-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .premium-box {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .coverage-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            padding: 12px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .calculator-section {
+            margin-top: 48px;
+            padding: 32px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .type-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .type-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 212, 255, 0.2));
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+
+        @media (max-width: 900px) {
+            .company-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1 class="page-title">🛡️ Insurance Comparison</h1>
+                    <p class="page-subtitle">Compare top insurance companies and secure your family's future</p>
+                </div>
+            </div>
+
+            <!-- Top 10 Insurance Companies -->
+            <div>
+                <h2 class="section-title">🏆 Top 10 Insurance Companies</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Leading insurers with high claim
+                    settlement ratios and comprehensive coverage</p>
+
+                <div class="company-grid" id="companiesGrid">
+                    <div class="glass-card" style="padding: 40px; text-align: center;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: #FFD700;"></i>
+                        <p style="margin-top: 16px; color: rgba(255,255,255,0.7);">Loading insurance data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Calculator -->
+            <div class="glass-card calculator-section">
+                <h2 class="section-title">🧮 Premium Calculator</h2>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px;">Estimate your insurance premium based on
+                    coverage and age</p>
+
+                <div class="type-selector">
+                    <button class="type-btn active" data-type="life">
+                        <i class="fa fa-heart-pulse"></i> Life Insurance
+                    </button>
+                    <button class="type-btn" data-type="health">
+                        <i class="fa fa-hospital"></i> Health Insurance
+                    </button>
+                    <button class="type-btn" data-type="car">
+                        <i class="fa fa-car"></i> Car Insurance
+                    </button>
+                </div>
+
+                <div class="calc-grid">
+                    <div>
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Your Age</label>
+                            <input id="calcAge" type="number" class="form-input" placeholder="e.g., 30" value="30" />
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Coverage Amount (₹)</label>
+                            <input id="calcCoverage" type="number" class="form-input" placeholder="e.g., 1000000"
+                                value="1000000" />
+                        </div>
+
+                        <div style="margin-bottom: 20px;" id="healthOptions" style="display: none;">
+                            <label class="form-label">Family Members</label>
+                            <select id="calcFamily" class="form-select">
+                                <option value="1">Individual</option>
+                                <option value="2">Self + Spouse</option>
+                                <option value="3">Self + Spouse + 1 Child</option>
+                                <option value="4">Self + Spouse + 2 Children</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label">Policy Term (Years)</label>
+                            <input id="calcTerm" type="number" class="form-input" placeholder="e.g., 20" value="20" />
+                        </div>
+
+                        <button id="calculatePremium" class="btn btn-primary" style="width: 100%;">
+                            <i class="fa fa-calculator"></i> Calculate Premium
+                        </button>
+                    </div>
+
+                    <div id="premiumResults" style="display: none;">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,212,255,0.1)); padding: 32px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2); text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 16px;">🛡️</div>
+                            <h3 style="margin: 0 0 8px 0;">Estimated Premium</h3>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 24px;"
+                                id="premiumType">Life Insurance</div>
+
+                            <div style="margin-bottom: 24px;">
+                                <div style="font-size: 3rem; font-weight: 700; color: #FFD700;" id="premiumAmount">₹0
+                                </div>
+                                <div style="color: rgba(255,255,255,0.6); margin-top: 8px;">per year</div>
+                            </div>
+
+                            <div style="padding: 20px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span style="color: rgba(255,255,255,0.7);">Coverage Amount</span>
+                                    <span style="font-weight: 600;" id="premiumCoverage">₹0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span style="color: rgba(255,255,255,0.7);">Policy Term</span>
+                                    <span style="font-weight: 600;" id="premiumTerm">0 years</span>
+                                </div>
+                                <div
+                                    style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                                    <span style="color: rgba(255,255,255,0.7);">Total Premium</span>
+                                    <span style="font-weight: 700; color: #00D4FF; font-size: 1.2rem;"
+                                        id="premiumTotal">₹0</span>
+                                </div>
+                            </div>
+
+                            <div
+                                style="margin-top: 20px; padding: 16px; background: rgba(0,255,136,0.1); border-radius: 8px; border: 1px solid rgba(0,255,136,0.2);">
+                                <i class="fa fa-info-circle" style="color: #00FF88;"></i>
+                                <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-left: 8px;">
+                                    This is an estimated premium. Actual premium may vary based on health, lifestyle,
+                                    and insurer.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Utilities
+        const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+
+        // State
+        const state = {
+            companies: [],
+            selectedType: 'life'
+        };
+
+        // Load Insurance Companies
+        const loadCompanies = async () => {
+            // Mock data - replace with API call
+            state.companies = [
+                { name: 'LIC (Life Insurance Corporation)', life_premium_start: 500, health_premium_start: 5000, car_premium_start: 2500, claim_settlement_ratio: 98.33, death_benefit_max: 100000000, hospital_coverage_max: 5000000, cashless_hospitals: 7000, rating: 4.6 },
+                { name: 'HDFC Life', life_premium_start: 600, health_premium_start: 6000, car_premium_start: 3000, claim_settlement_ratio: 98.01, death_benefit_max: 50000000, hospital_coverage_max: 3000000, cashless_hospitals: 6500, rating: 4.7 },
+                { name: 'SBI Life', life_premium_start: 550, health_premium_start: 5500, car_premium_start: 2800, claim_settlement_ratio: 97.79, death_benefit_max: 75000000, hospital_coverage_max: 4000000, cashless_hospitals: 7500, rating: 4.6 },
+                { name: 'ICICI Prudential', life_premium_start: 650, health_premium_start: 6500, car_premium_start: 3200, claim_settlement_ratio: 98.58, death_benefit_max: 60000000, hospital_coverage_max: 3500000, cashless_hospitals: 6800, rating: 4.7 },
+                { name: 'Max Life Insurance', life_premium_start: 700, health_premium_start: 7000, car_premium_start: 3500, claim_settlement_ratio: 99.51, death_benefit_max: 50000000, hospital_coverage_max: 3000000, cashless_hospitals: 5500, rating: 4.8 },
+                { name: 'Bajaj Allianz Life', life_premium_start: 600, health_premium_start: 6000, car_premium_start: 3000, claim_settlement_ratio: 97.37, death_benefit_max: 40000000, hospital_coverage_max: 2500000, cashless_hospitals: 6000, rating: 4.5 },
+                { name: 'Tata AIA Life', life_premium_start: 650, health_premium_start: 6500, car_premium_start: 3200, claim_settlement_ratio: 98.03, death_benefit_max: 45000000, hospital_coverage_max: 2800000, cashless_hospitals: 5800, rating: 4.6 },
+                { name: 'Aditya Birla Sun Life', life_premium_start: 600, health_premium_start: 6000, car_premium_start: 3000, claim_settlement_ratio: 97.26, death_benefit_max: 40000000, hospital_coverage_max: 2500000, cashless_hospitals: 5500, rating: 4.5 },
+                { name: 'Kotak Life Insurance', life_premium_start: 650, health_premium_start: 6500, car_premium_start: 3200, claim_settlement_ratio: 98.75, death_benefit_max: 50000000, hospital_coverage_max: 3000000, cashless_hospitals: 6200, rating: 4.7 },
+                { name: 'Star Health Insurance', life_premium_start: 500, health_premium_start: 4500, car_premium_start: 2500, claim_settlement_ratio: 89.34, death_benefit_max: 25000000, hospital_coverage_max: 5000000, cashless_hospitals: 14000, rating: 4.4 }
+            ];
+            renderCompanies();
+        };
+
+        // Render Companies
+        const renderCompanies = () => {
+            const grid = document.getElementById('companiesGrid');
+            grid.innerHTML = '';
+
+            state.companies.forEach(company => {
+                const card = document.createElement('div');
+                card.className = 'glass-card company-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="margin: 0 0 12px 0;">${company.name}</h3>
+                            <div class="claim-ratio">
+                                <i class="fa fa-shield-check"></i>
+                                ${company.claim_settlement_ratio}%
+                            </div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 8px;">Claim Settlement Ratio</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Rating</div>
+                            <div style="color: #FFD700; font-size: 1.1rem;">
+                                ${'⭐'.repeat(Math.round(company.rating))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="premium-grid">
+                        <div class="premium-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">
+                                <i class="fa fa-heart-pulse"></i> Life
+                            </div>
+                            <div style="font-weight: 700; color: #FFD700;">₹${company.life_premium_start}+</div>
+                        </div>
+                        <div class="premium-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">
+                                <i class="fa fa-hospital"></i> Health
+                            </div>
+                            <div style="font-weight: 700; color: #00D4FF;">₹${company.health_premium_start}+</div>
+                        </div>
+                        <div class="premium-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">
+                                <i class="fa fa-car"></i> Car
+                            </div>
+                            <div style="font-weight: 700; color: #00FF88;">₹${company.car_premium_start}+</div>
+                        </div>
+                    </div>
+
+                    <div class="coverage-stats">
+                        <div class="stat-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Max Death Benefit</div>
+                            <div style="font-weight: 700; color: #FFD700;">${fmtINR(company.death_benefit_max)}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Hospital Coverage</div>
+                            <div style="font-weight: 700; color: #00D4FF;">${fmtINR(company.hospital_coverage_max)}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                            <i class="fa fa-hospital"></i> ${company.cashless_hospitals.toLocaleString()} Hospitals
+                        </span>
+                        <button class="btn btn-sm btn-primary" onclick="alert('Get Quote feature coming soon!')">
+                            <i class="fa fa-file-invoice"></i> Get Quote
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        // Type Selector
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.selectedType = btn.getAttribute('data-type');
+
+                // Show/hide health options
+                document.getElementById('healthOptions').style.display =
+                    state.selectedType === 'health' ? 'block' : 'none';
+            };
+        });
+
+        // Premium Calculator
+        document.getElementById('calculatePremium').onclick = () => {
+            const age = parseInt(document.getElementById('calcAge').value) || 0;
+            const coverage = parseInt(document.getElementById('calcCoverage').value) || 0;
+            const term = parseInt(document.getElementById('calcTerm').value) || 0;
+            const family = state.selectedType === 'health' ? parseInt(document.getElementById('calcFamily').value) || 1 : 1;
+
+            if (age <= 0 || coverage <= 0 || term <= 0) {
+                alert('Please enter valid values');
+                return;
+            }
+
+            let basePremium = 0;
+            let typeName = '';
+
+            // Simple premium calculation (actual would be much more complex)
+            if (state.selectedType === 'life') {
+                basePremium = (coverage / 1000) * (age / 10) * 1.2;
+                typeName = 'Life Insurance';
+            } else if (state.selectedType === 'health') {
+                basePremium = (coverage / 100) * (age / 10) * family * 0.8;
+                typeName = 'Health Insurance';
+            } else {
+                basePremium = coverage * 0.03; // 3% of car value
+                typeName = 'Car Insurance';
+            }
+
+            const annualPremium = Math.round(basePremium);
+            const totalPremium = annualPremium * term;
+
+            document.getElementById('premiumType').textContent = typeName;
+            document.getElementById('premiumAmount').textContent = fmtINR(annualPremium);
+            document.getElementById('premiumCoverage').textContent = fmtINR(coverage);
+            document.getElementById('premiumTerm').textContent = `${term} years`;
+            document.getElementById('premiumTotal').textContent = fmtINR(totalPremium);
+            document.getElementById('premiumResults').style.display = 'block';
+        };
+
+        // Initialize
+        loadCompanies();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,582 @@
+"""
+CredNest AI - Database Models
+Complete schema for ultra-premium financial platform
+"""
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from utils import format_timestamp
+
+db = SQLAlchemy()
+
+class User(UserMixin, db.Model):
+    """Enhanced User model with comprehensive profile"""
+    __tablename__ = 'users'
+    
+    # Authentication
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    
+    # Basic Info
+    name = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(20))  # Male, Female, Other, Prefer not to say
+    date_of_birth = db.Column(db.Date)
+    phone = db.Column(db.String(20))
+    
+    # Address
+    address = db.Column(db.Text)
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    country = db.Column(db.String(100), default='India')
+    pincode = db.Column(db.String(10))
+    
+    # Professional
+    occupation = db.Column(db.String(100))
+    company = db.Column(db.String(150))
+    monthly_income = db.Column(db.Float)
+    
+    # Profile
+    profile_image = db.Column(db.String(255))
+    bio = db.Column(db.Text)
+    profile_completed = db.Column(db.Boolean, default=False)
+    
+    # Account Status
+    is_active = db.Column(db.Boolean, default=True)
+    is_verified = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    last_login = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    chat_history = db.relationship('ChatHistory', backref='user', lazy=True, cascade='all, delete-orphan')
+    budgets = db.relationship('Budget', backref='user', lazy=True, cascade='all, delete-orphan')
+    expenses = db.relationship('Expense', backref='user', lazy=True, cascade='all, delete-orphan')
+    incomes = db.relationship('Income', backref='user', lazy=True, cascade='all, delete-orphan')
+    
+    # Extra relationships from old models.py (kept for compatibility if needed later)
+    savings_goals = db.relationship('SavingsGoal', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    investments = db.relationship('Investment', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    loans = db.relationship('Loan', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    insurance_policies = db.relationship('InsurancePolicy', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self):
+        """Convert to dictionary"""
+        return {
+            'id': self.id,
+            'email': self.email,
+            'name': self.name,
+            'age': self.age,
+            'gender': self.gender,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
+            'phone': self.phone,
+            'address': self.address,
+            'city': self.city,
+            'state': self.state,
+            'country': self.country,
+            'pincode': self.pincode,
+            'occupation': self.occupation,
+            'company': self.company,
+            'monthly_income': self.monthly_income,
+            'profile_image': self.profile_image,
+            'bio': self.bio,
+            'profile_completed': self.profile_completed,
+            'is_verified': self.is_verified,
+            'created_at': format_timestamp(self.created_at),
+            'last_login': format_timestamp(self.last_login),
+            'updated_at': format_timestamp(self.updated_at)
+        }
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+
+class ChatHistory(db.Model):
+    """Enhanced chat history with response tracking"""
+    __tablename__ = 'chat_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    session_id = db.Column(db.String(100), index=True, nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    response = db.Column(db.Text, nullable=False)
+    tool_used = db.Column(db.String(100))
+    response_time = db.Column(db.Float)  # Response time in seconds
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'session_id': self.session_id,
+            'message': self.message,
+            'response': self.response,
+            'tool_used': self.tool_used,
+            'response_time': self.response_time,
+            'created_at': format_timestamp(self.created_at)
+        }
+    
+    def __repr__(self):
+        return f'<ChatHistory {self.id}>'
+
+
+class Budget(db.Model):
+    """Monthly budget tracking with categories"""
+    __tablename__ = 'budgets'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    month = db.Column(db.String(7), nullable=False, index=True)  # Format: YYYY-MM
+    category = db.Column(db.String(50), nullable=False)
+    planned_amount = db.Column(db.Float, nullable=False)
+    spent_amount = db.Column(db.Float, default=0.0)
+    
+    # Visual & Organization
+    icon = db.Column(db.String(10), default='📦')
+    color = db.Column(db.String(7), default='#95A5A6')
+    notes = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def get_remaining(self):
+        """Get remaining budget"""
+        return self.planned_amount - self.spent_amount
+    
+    def get_percentage(self):
+        """Get spending percentage"""
+        if self.planned_amount > 0:
+            return round((self.spent_amount / self.planned_amount) * 100, 2)
+        return 0
+    
+    def is_over_budget(self):
+        """Check if over budget"""
+        return self.spent_amount > self.planned_amount
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'month': self.month,
+            'category': self.category,
+            'planned_amount': self.planned_amount,
+            'spent_amount': self.spent_amount,
+            'remaining': self.get_remaining(),
+            'percentage': self.get_percentage(),
+            'is_over_budget': self.is_over_budget(),
+            'icon': self.icon,
+            'color': self.color,
+            'notes': self.notes,
+            'is_active': self.is_active,
+            'created_at': format_timestamp(self.created_at),
+            'updated_at': format_timestamp(self.updated_at)
+        }
+    
+    def __repr__(self):
+        return f'<Budget {self.category} - {self.month}>'
+
+
+class Expense(db.Model):
+    """Daily expense tracking"""
+    __tablename__ = 'expenses'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    budget_id = db.Column(db.Integer, db.ForeignKey('budgets.id'))
+    
+    # Transaction Details
+    amount = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), nullable=False, index=True)
+    description = db.Column(db.Text)
+    date = db.Column(db.Date, nullable=False, default=datetime.utcnow, index=True)
+    
+    # Payment Info
+    payment_method = db.Column(db.String(50))  # Cash, Card, UPI, etc.
+    location = db.Column(db.String(150))
+    
+    # Organization
+    tags = db.Column(db.String(255))  # Comma-separated tags
+    notes = db.Column(db.Text)
+    
+    # Recurring
+    is_recurring = db.Column(db.Boolean, default=False)
+    recurring_frequency = db.Column(db.String(20))  # daily, weekly, monthly
+    
+    # Metadata
+    receipt_url = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'amount': self.amount,
+            'category': self.category,
+            'description': self.description,
+            'date': self.date.isoformat() if self.date else None,
+            'payment_method': self.payment_method,
+            'location': self.location,
+            'tags': self.tags.split(',') if self.tags else [],
+            'notes': self.notes,
+            'is_recurring': self.is_recurring,
+            'recurring_frequency': self.recurring_frequency,
+            'receipt_url': self.receipt_url,
+            'created_at': format_timestamp(self.created_at),
+            'updated_at': format_timestamp(self.updated_at)
+        }
+    
+    def __repr__(self):
+        return f'<Expense {self.category} - ₹{self.amount}>'
+
+
+class Income(db.Model):
+    """Monthly income tracking"""
+    __tablename__ = 'incomes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    
+    # Income Details
+    month = db.Column(db.String(7), nullable=False, index=True)  # Format: YYYY-MM
+    source = db.Column(db.String(100), nullable=False)  # Salary, Business, Freelance, etc.
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)
+    
+    # Recurring
+    is_recurring = db.Column(db.Boolean, default=False)
+    
+    # Metadata
+    received_date = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'month': self.month,
+            'source': self.source,
+            'amount': self.amount,
+            'description': self.description,
+            'is_recurring': self.is_recurring,
+            'received_date': self.received_date.isoformat() if self.received_date else None,
+            'created_at': format_timestamp(self.created_at),
+            'updated_at': format_timestamp(self.updated_at)
+        }
+    
+    def __repr__(self):
+        return f'<Income {self.source} - ₹{self.amount}>'
+
+
+class Bank(db.Model):
+    """Top 20 banks data"""
+    __tablename__ = 'banks'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    logo_url = db.Column(db.String(255))
+    personal_loan_rate = db.Column(db.Float)
+    home_loan_rate = db.Column(db.Float)
+    car_loan_rate = db.Column(db.Float)
+    education_loan_rate = db.Column(db.Float)
+    business_loan_rate = db.Column(db.Float)
+    savings_rate = db.Column(db.Float)
+    fd_rate = db.Column(db.Float)
+    processing_fee_percentage = db.Column(db.Float)
+    min_loan_amount = db.Column(db.Float)
+    max_loan_amount = db.Column(db.Float)
+    min_tenure_months = db.Column(db.Integer)
+    max_tenure_months = db.Column(db.Integer)
+    rating = db.Column(db.Float)
+    customer_support = db.Column(db.String(100))
+    website = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'logo_url': self.logo_url,
+            'rates': {
+                'personal_loan': self.personal_loan_rate,
+                'home_loan': self.home_loan_rate,
+                'car_loan': self.car_loan_rate,
+                'education_loan': self.education_loan_rate,
+                'business_loan': self.business_loan_rate,
+                'savings': self.savings_rate,
+                'fd': self.fd_rate
+            },
+            'processing_fee': self.processing_fee_percentage,
+            'loan_range': {
+                'min': self.min_loan_amount,
+                'max': self.max_loan_amount
+            },
+            'tenure_range': {
+                'min': self.min_tenure_months,
+                'max': self.max_tenure_months
+            },
+            'rating': self.rating,
+            'customer_support': self.customer_support,
+            'website': self.website,
+            'description': self.description
+        }
+
+
+class InsuranceCompany(db.Model):
+    """Top 10 insurance companies"""
+    __tablename__ = 'insurance_companies'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    logo_url = db.Column(db.String(255))
+    life_premium_start = db.Column(db.Float)
+    health_premium_start = db.Column(db.Float)
+    car_premium_start = db.Column(db.Float)
+    claim_settlement_ratio = db.Column(db.Float)
+    death_benefit_max = db.Column(db.Float)
+    hospital_coverage_max = db.Column(db.Float)
+    cashless_hospitals = db.Column(db.Integer)
+    rating = db.Column(db.Float)
+    customer_support = db.Column(db.String(100))
+    website = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'logo_url': self.logo_url,
+            'premiums': {
+                'life': self.life_premium_start,
+                'health': self.health_premium_start,
+                'car': self.car_premium_start
+            },
+            'claim_settlement_ratio': self.claim_settlement_ratio,
+            'death_benefit_max': self.death_benefit_max,
+            'hospital_coverage_max': self.hospital_coverage_max,
+            'cashless_hospitals': self.cashless_hospitals,
+            'rating': self.rating,
+            'customer_support': self.customer_support,
+            'website': self.website,
+            'description': self.description
+        }
+
+
+class InvestmentFund(db.Model):
+    """Top 10 investment funds"""
+    __tablename__ = 'investment_funds'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    fund_name = db.Column(db.String(200), nullable=False)
+    fund_type = db.Column(db.String(50), nullable=False)
+    amc_name = db.Column(db.String(100))
+    nav = db.Column(db.Float, nullable=False)
+    returns_1yr = db.Column(db.Float)
+    returns_3yr = db.Column(db.Float)
+    returns_5yr = db.Column(db.Float)
+    expense_ratio = db.Column(db.Float)
+    min_investment = db.Column(db.Float)
+    min_sip = db.Column(db.Float)
+    risk_level = db.Column(db.String(20))
+    rating = db.Column(db.Float)
+    description = db.Column(db.Text)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'fund_name': self.fund_name,
+            'fund_type': self.fund_type,
+            'amc_name': self.amc_name,
+            'nav': self.nav,
+            'returns': {
+                '1yr': self.returns_1yr,
+                '3yr': self.returns_3yr,
+                '5yr': self.returns_5yr
+            },
+            'expense_ratio': self.expense_ratio,
+            'min_investment': self.min_investment,
+            'min_sip': self.min_sip,
+            'risk_level': self.risk_level,
+            'rating': self.rating,
+            'description': self.description
+        }
+
+# ============================================================================
+# EXTRA MODELS (From original models.py, kept for reference/future use)
+# ============================================================================
+
+class SavingsGoal(db.Model):
+    """Savings goals tracking"""
+    __tablename__ = 'savings_goals'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    goal_name = db.Column(db.String(100), nullable=False)
+    target_amount = db.Column(db.Float, nullable=False)
+    current_amount = db.Column(db.Float, default=0.0)
+    target_date = db.Column(db.Date)
+    icon = db.Column(db.String(50), default='💰')
+    status = db.Column(db.String(20), default='active')  # active, completed, cancelled
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'goal_name': self.goal_name,
+            'target_amount': self.target_amount,
+            'current_amount': self.current_amount,
+            'remaining': self.target_amount - self.current_amount,
+            'percentage': (self.current_amount / self.target_amount * 100) if self.target_amount > 0 else 0,
+            'target_date': self.target_date.isoformat() if self.target_date else None,
+            'icon': self.icon,
+            'status': self.status
+        }
+
+
+class Investment(db.Model):
+    """Investment portfolio tracking"""
+    __tablename__ = 'investments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    investment_type = db.Column(db.String(50), nullable=False)  # Mutual Fund, SIP, Stocks, etc.
+    fund_name = db.Column(db.String(200), nullable=False)
+    invested_amount = db.Column(db.Float, nullable=False)
+    current_value = db.Column(db.Float, nullable=False)
+    returns = db.Column(db.Float)
+    units = db.Column(db.Float)
+    purchase_date = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String(20), default='active')  # active, sold
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'investment_type': self.investment_type,
+            'fund_name': self.fund_name,
+            'invested_amount': self.invested_amount,
+            'current_value': self.current_value,
+            'returns': self.returns,
+            'returns_percentage': ((self.current_value - self.invested_amount) / self.invested_amount * 100) if self.invested_amount > 0 else 0,
+            'units': self.units,
+            'purchase_date': self.purchase_date.isoformat(),
+            'status': self.status
+        }
+
+
+class Loan(db.Model):
+    """Loan management"""
+    __tablename__ = 'loans'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    loan_type = db.Column(db.String(50), nullable=False)
+    bank_name = db.Column(db.String(100), nullable=False)
+    loan_amount = db.Column(db.Float, nullable=False)
+    interest_rate = db.Column(db.Float, nullable=False)
+    tenure_months = db.Column(db.Integer, nullable=False)
+    emi = db.Column(db.Float, nullable=False)
+    total_interest = db.Column(db.Float)
+    total_amount = db.Column(db.Float)
+    amount_paid = db.Column(db.Float, default=0.0)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    status = db.Column(db.String(20), default='active')  # active, closed, defaulted
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'loan_type': self.loan_type,
+            'bank_name': self.bank_name,
+            'loan_amount': self.loan_amount,
+            'interest_rate': self.interest_rate,
+            'tenure_months': self.tenure_months,
+            'emi': self.emi,
+            'total_interest': self.total_interest,
+            'total_amount': self.total_amount,
+            'amount_paid': self.amount_paid,
+            'remaining': self.total_amount - self.amount_paid if self.total_amount else 0,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'status': self.status
+        }
+
+
+class InsurancePolicy(db.Model):
+    """Insurance policy tracking"""
+    __tablename__ = 'insurance_policies'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    policy_type = db.Column(db.String(50), nullable=False)  # Life, Health, Car, etc.
+    company_name = db.Column(db.String(100), nullable=False)
+    policy_number = db.Column(db.String(100), unique=True)
+    premium_amount = db.Column(db.Float, nullable=False)
+    premium_frequency = db.Column(db.String(20), default='yearly')  # monthly, yearly
+    coverage_amount = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    beneficiary = db.Column(db.String(100))
+    status = db.Column(db.String(20), default='active')  # active, expired, cancelled
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'policy_type': self.policy_type,
+            'company_name': self.company_name,
+            'policy_number': self.policy_number,
+            'premium_amount': self.premium_amount,
+            'premium_frequency': self.premium_frequency,
+            'coverage_amount': self.coverage_amount,
+            'start_date': self.start_date.isoformat(),
+            'end_date': self.end_date.isoformat(),
+            'beneficiary': self.beneficiary,
+            'status': self.status
+        }
+ 
+ 
+
+class Feedback(db.Model):
+    "`User feedback and suggestions"`
+    __tablename__ = 'feedback'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    rating = db.Column(db.Integer)
+    subject = db.Column(db.String(200))
+    message = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    admin_response = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'category': self.category,
+            'rating': self.rating,
+            'subject': self.subject,
+            'message': self.message,
+            'status': self.status,
+            'admin_response': self.admin_response,
+            'created_at': format_timestamp(self.created_at),
+            'updated_at': format_timestamp(self.updated_at)
+        }
+    
+    def __repr__(self):
+        return f'<Feedback {self.id} - {self.category}>'

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredNest AI - Ultra Premium Financial Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: translateY(-100vh) translateX(50px) scale(1.5);
+                opacity: 0.5;
+            }
+
+            90% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Glass container */
+        .glass-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            backdrop-filter: blur(30px);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            font-size: 4em;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tagline {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Main layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .auth-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 1em;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* User info card */
+        .user-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .user-email {
+            text-align: center;
+            opacity: 0.8;
+            font-size: 0.95em;
+        }
+
+        /* Chat area */
+        .chat-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 24px 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-header h2 {
+            font-size: 1.6em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: messageSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--success) 0%, #06b6d4 100%);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 18px 22px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 1.02em;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message.ai .message-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message-label {
+            font-size: 0.85em;
+            opacity: 0.7;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .tool-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-top: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+
+        /* Chat input */
+        .chat-input-area {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            color: white;
+            font-size: 1.05em;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .send-btn {
+            padding: 18px 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 18px 22px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-12px);
+            }
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loading state */
+        .loading-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.7;
+        }
+
+        .loading-placeholder .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                grid-row: 1;
+            }
+
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .glass-container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .logo {
+                font-size: 3em;
+            }
+
+            .main-layout {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        /* Performance optimizations */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            will-change: transform;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="glass-container">
+        <!-- Header -->
+        <div class="glass-card">
+            <div class="header">
+                <div class="header-content">
+                    <div class="logo">🏦</div>
+                    <h1>CredNest AI</h1>
+                    <p class="tagline">Ultra-Premium Financial Intelligence Platform</p>
+                </div>
+            </div>
+
+            <!-- Main Layout -->
+            <div class="main-layout">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Login Form -->
+                    <div id="loginSection" class="auth-card">
+                        <h3 class="auth-title">Welcome Back</h3>
+                        <div id="loginError" class="alert alert-error hidden"></div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+                        </div>
+                        <button class="btn btn-primary" onclick="login()">
+                            <span>Sign In</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="showRegister()">
+                            <span>Create New Account</span>
+                        </button>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerSection" class="auth-card hidden">
+                        <h3 class="auth-title">Create Account</h3>
+                        <div id="registerError" class="alert alert-error hidden"></div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="registerName" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" id="registerEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="registerPassword" placeholder="••••••••">
+                        </div>
+                        <button class="btn btn-primary" onclick="register()">
+                            <span>Create Account</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="showLogin()">
+                            <span>Back to Login</span>
+                        </button>
+                    </div>
+
+                    <!-- User Info -->
+                    <div id="userSection" class="hidden">
+                        <div class="user-card">
+                            <div class="user-avatar" id="userAvatar">A</div>
+                            <div class="user-name" id="userName"></div>
+                            <div class="user-email" id="userEmail"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="logout()">
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-container gpu-accelerated">
+                    <div class="chat-header">
+                        <h2>💬 AI Financial Assistant</h2>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="loading-placeholder">
+                            <div class="icon">🔒</div>
+                            <p>Please sign in to start your financial journey</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="messageInput"
+                            placeholder="Ask about EMI, loans, investments..." disabled>
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:5000/api';
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+
+        // Initialize particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30; // Optimized for RTX 3060
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 6 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Check authentication on load
+        if (authToken) {
+            loadProfile();
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('registerSection').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+        }
+
+        async function register() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            if (!name || !email || !password) {
+                showError('registerError', 'All fields are required');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('registerError', 'Password must be at least 6 characters');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    currentUser = data.user;
+                    showUserSection();
+                    enableChat();
+                    showSuccess('registerError', 'Account created successfully!');
+                    setTimeout(showLogin, 1500);
+                } else {
+                    showError('registerError', data.error);
+                }
+            } catch (error) {
+                showError('registerError', 'Connection failed. Please ensure the server is running on port 5000.');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('loginError', 'Email and password are required');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    currentUser = data.user;
+                    showUserSection();
+                    enableChat();
+                } else {
+                    showError('loginError', data.error);
+                }
+            } catch (error) {
+                showError('loginError', 'Connection failed. Please ensure the server is running on port 5000.');
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    showUserSection();
+                    enableChat();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                logout();
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('userSection').classList.add('hidden');
+            document.getElementById('messageInput').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="loading-placeholder">
+                    <div class="icon">🔒</div>
+                    <p>Please sign in to start your financial journey</p>
+                </div>
+            `;
+        }
+
+        function showUserSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('userSection').classList.remove('hidden');
+
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+
+        function enableChat() {
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="message ai">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-label">AI Assistant</div>
+                        Hello ${currentUser.name}! 👋 I'm your personal financial assistant powered by Google Gemini. 
+                        I can help you with:<br><br>
+                        💰 EMI calculations<br>
+                        📊 Loan eligibility checks<br>
+                        💡 Financial tips & advice<br>
+                        🏦 Bank comparisons<br><br>
+                        What would you like to know?
+                    </div>
+                </div>
+            `;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+
+            const typingId = addTypingIndicator();
+
+            try {
+                const response = await fetch(`${API_URL}/chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                removeTypingIndicator(typingId);
+
+                if (data.success) {
+                    addMessage('ai', data.response, data.toolUsed);
+                } else {
+                    addMessage('ai', '❌ Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                removeTypingIndicator(typingId);
+                addMessage('ai', '❌ Connection failed. Please check if the server is running.');
+            }
+        }
+
+        function addMessage(type, content, toolUsed) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = type === 'user' ?
+                `<div class="message-avatar">${currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>` :
+                `<div class="message-avatar">🤖</div>`;
+
+            const label = type === 'user' ? 'You' : 'AI Assistant';
+            const toolBadge = toolUsed ? `<div class="tool-badge">🔧 ${toolUsed}</div>` : '';
+
+            messageDiv.innerHTML = `
+                ${avatar}
+                <div class="message-content">
+                    <div class="message-label">${label}</div>
+                    ${content}
+                    ${toolBadge}
+                </div>
+            `;
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai';
+            typingDiv.id = 'typing-' + Date.now();
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return typingDiv.id;
+        }
+
+        function removeTypingIndicator(id) {
+            const typingDiv = document.getElementById(id);
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function showError(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = message;
+            errorDiv.className = 'alert alert-error';
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        }
+
+        function showSuccess(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = message;
+            errorDiv.className = 'alert alert-success';
+            setTimeout(() => errorDiv.classList.add('hidden'), 3000);
+        }
+
+        // Keyboard shortcuts
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        document.getElementById('registerPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') register();
+        });
+
+        // Performance monitoring
+        console.log('%c🚀 CredNest AI v2.0 Ultra Premium', 'color: #6366f1; font-size: 20px; font-weight: bold;');
+        console.log('%c⚡ Optimized for RTX 3060', 'color: #10b981; font-size: 14px;');
+        console.log('%c💎 Glassmorphism UI Active', 'color: #8b5cf6; font-size: 14px;');
+    </script>
+</body>
+
+</html>

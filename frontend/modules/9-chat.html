@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Assistant - CredNest AI</title>
+    <link rel="stylesheet" href="../css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Enhanced ChatGPT-Style Interface */
+        .chat-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: calc(100vh - 80px);
+            margin-top: 80px;
+            gap: 0;
+        }
+
+        /* Sidebar Styles */
+        .chat-sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-header h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            padding: 0.875rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--bg-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            box-shadow: var(--glow-gold);
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .chat-history {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-history-item {
+            padding: 0.875rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .chat-history-item:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--crednest-gold);
+            transform: translateX(4px);
+        }
+
+        .chat-history-item.active {
+            border-color: var(--crednest-gold);
+            background: var(--glass-bg-hover);
+        }
+
+        .chat-history-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--gradient-gold);
+        }
+
+        .chat-history-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-history-preview {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-history-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Main Chat Area */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        .chat-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-header-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-gold);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--glow-gold);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Message Styles */
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 85%;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+
+        .message.ai .message-avatar {
+            background: var(--gradient-gold);
+            box-shadow: var(--glow-gold);
+        }
+
+        .message.user .message-avatar {
+            background: var(--gradient-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            line-height: 1.7;
+        }
+
+        .message.ai .message-bubble {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+        }
+
+        .message.user .message-bubble {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+            font-weight: 500;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            width: fit-content;
+            margin-left: 56px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--crednest-gold);
+            border-radius: 50%;
+            animation: typing 1.4s ease infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Fixed Chat Input - ChatGPT Style */
+        .chat-input-container {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--glass-border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-height: 52px;
+            max-height: 200px;
+            padding: 1rem 1.5rem;
+            background: var(--bg-input);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+            font-family: inherit;
+            transition: all var(--transition-normal);
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--crednest-gold);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        }
+
+        .send-btn {
+            padding: 1rem 1.75rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: var(--radius-xl);
+            color: var(--bg-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            box-shadow: var(--glow-gold);
+            min-width: 100px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .quick-action-btn {
+            padding: 0.625rem 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .quick-action-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--crednest-gold);
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-sidebar {
+                display: none;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar,
+        .chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .chat-history::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: var(--crednest-gold);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/budgeting" class="navbar-link">Budgeting</a></li>
+                <li><a href="/chat" class="navbar-link active">AI Chat</a></li>
+                <li><button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <!-- Sidebar with Chat History -->
+        <div class="chat-sidebar">
+            <div class="sidebar-header">
+                <h3>💬 Chat History</h3>
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+            <ul class="chat-history" id="chatHistory">
+                <!-- Chat history will be loaded here -->
+                <div class="empty-state" id="emptyHistory">
+                    <i class="fas fa-comments"></i>
+                    <p>No chat history yet.<br>Start a new conversation!</p>
+                </div>
+            </ul>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-header-title">
+                    <div class="chat-header-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2>AI Finance Assistant</h2>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">
+                            Your personal finance expert - Ask me anything!
+                        </p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="clearChat()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome Message -->
+                <div class="message ai">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            <p><strong>👋 Hello! I'm your CredNest AI Finance Assistant!</strong></p>
+                            <p style="margin-top: 0.75rem;">I can help you with:</p>
+                            <ul style="margin: 0.75rem 0; padding-left: 1.5rem; line-height: 1.8;">
+                                <li>💰 <strong>Loans</strong> - Personal, Home, Car, Education</li>
+                                <li>📊 <strong>CIBIL Scores</strong> - Understanding and improving</li>
+                                <li>💳 <strong>Banking</strong> - Rates, eligibility, comparisons</li>
+                                <li>🧮 <strong>EMI Calculations</strong> - Planning your payments</li>
+                                <li>📈 <strong>Investments</strong> - Mutual funds, stocks, FDs</li>
+                                <li>🛡️ <strong>Insurance</strong> - Life, health, vehicle coverage</li>
+                            </ul>
+                            <p style="margin-top: 0.75rem;">How can I assist you today?</p>
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <!-- Chat Input - Fixed at Bottom -->
+            <div class="chat-input-container">
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="sendQuickMessage('What are the best home loan rates?')">
+                        🏠 Home Loan Rates
+                    </button>
+                    <button class="quick-action-btn" onclick="sendQuickMessage('How to improve my CIBIL score?')">
+                        📊 Improve CIBIL
+                    </button>
+                    <button class="quick-action-btn" onclick="sendQuickMessage('Calculate EMI for 10 lakh loan')">
+                        💰 Calculate EMI
+                    </button>
+                    <button class="quick-action-btn"
+                        onclick="sendQuickMessage('Best investment options for beginners')">
+                        📈 Investment Tips
+                    </button>
+                </div>
+                <div class="chat-input-wrapper">
+                    <textarea id="chatInput" class="chat-input"
+                        placeholder="Ask me anything about finance... (Press Enter to send, Shift+Enter for new line)"
+                        rows="1" onkeydown="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = `session_${Date.now()}`;
+        let chatSessions = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChatHistory();
+        });
+
+        // Load chat history from server
+        async function loadChatHistory() {
+            try {
+                const response = await fetch('/api/chat/sessions');
+                if (response.ok) {
+                    const data = await response.json();
+                    chatSessions = data.sessions || [];
+                    renderChatHistory();
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        // Render chat history in sidebar
+        function renderChatHistory() {
+            const historyDiv = document.getElementById('chatHistory');
+            const emptyState = document.getElementById('emptyHistory');
+
+            if (chatSessions.length === 0) {
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            historyDiv.innerHTML = '';
+
+            chatSessions.forEach((session, index) => {
+                const li = document.createElement('li');
+                li.className = 'chat-history-item';
+                if (session.session_id === currentSessionId) {
+                    li.classList.add('active');
+                }
+
+                const title = session.title || `Chat ${index + 1}`;
+                const preview = session.last_message || 'No messages yet';
+                const date = new Date(session.created_at).toLocaleDateString();
+
+                li.innerHTML = `
+                    <div class="chat-history-title">${title}</div>
+                    <div class="chat-history-preview">${preview}</div>
+                    <div class="chat-history-date">${date}</div>
+                `;
+
+                li.onclick = () => loadSession(session.session_id);
+                historyDiv.appendChild(li);
+            });
+        }
+
+        // Load specific session
+        async function loadSession(sessionId) {
+            try {
+                const response = await fetch(`/api/chat/session/${sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSessionId = sessionId;
+
+                    // Clear current messages
+                    document.getElementById('chatMessages').innerHTML = '';
+
+                    // Load session messages
+                    data.messages.forEach(msg => {
+                        addMessage(msg.message, 'user', false);
+                        addMessage(msg.response, 'ai', false);
+                    });
+
+                    // Update active state
+                    renderChatHistory();
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('Error loading session:', error);
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to UI
+            addMessage(message, 'user');
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Show typing indicator
+            document.getElementById('typingIndicator').classList.add('active');
+            scrollToBottom();
+
+            // Disable send button
+            document.getElementById('sendBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/chat/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: currentSessionId
+                    })
+                });
+
+                const data = await response.json();
+
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('active');
+
+                if (response.ok) {
+                    // Add AI response
+                    addMessage(data.message, 'ai');
+
+                    // Reload chat history to update
+                    loadChatHistory();
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+                }
+            } catch (error) {
+                document.getElementById('typingIndicator').classList.remove('active');
+                addMessage('Network error. Please check your connection and try again.', 'ai');
+            }
+
+            // Re-enable send button
+            document.getElementById('sendBtn').disabled = false;
+            input.focus();
+        }
+
+        // Add message to chat
+        function addMessage(text, sender, scroll = true) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = sender === 'ai' ? '🤖' : '👤';
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        ${formatMessage(text)}
+                    </div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+
+            messagesDiv.appendChild(messageDiv);
+            if (scroll) scrollToBottom();
+        }
+
+        // Format message with markdown-like features
+        function formatMessage(text) {
+            // Convert **bold** to <strong>
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Convert line breaks
+            text = text.replace(/\n/g, '<br>');
+
+            // Convert bullet points
+            text = text.replace(/^• /gm, '&bull; ');
+
+            return text;
+        }
+
+        // Send quick message
+        function sendQuickMessage(message) {
+            document.getElementById('chatInput').value = message;
+            sendMessage();
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+        }
+
+        // Start new chat
+        function startNewChat() {
+            currentSessionId = `session_${Date.now()}`;
+            document.getElementById('chatMessages').innerHTML = '';
+
+            // Add welcome message
+            addMessage('👋 Hello! How can I help you with your financial questions today?', 'ai');
+
+            // Update history
+            renderChatHistory();
+
+            // Focus input
+            document.getElementById('chatInput').focus();
+        }
+
+        // Clear chat
+        function clearChat() {
+            if (confirm('Are you sure you want to clear this chat? This cannot be undone.')) {
+                startNewChat();
+            }
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            const messagesDiv = document.getElementById('chatMessages');
+            setTimeout(() => {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 100);
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>

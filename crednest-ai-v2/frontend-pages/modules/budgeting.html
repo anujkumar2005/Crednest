@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgeting - CredNest AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <span class="logo">🏦</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.html">📊 Dashboard</a></li>
+                <li><a href="chat.html">💬 AI Chat</a></li>
+                <li><a href="budgeting.html" class="active">💰 Budgeting</a></li>
+                <li><a href="expenses.html">📝 Expenses</a></li>
+                <li><a href="loans.html">🏦 Loans</a></li>
+                <li><a href="investments.html">📈 Investments</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-avatar" id="userAvatar" onclick="logout()">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <h1 style="font-size: 2.5em;">Budget Manager 💰</h1>
+            <button class="btn btn-primary" onclick="showAddBudgetModal()">➕ Add Budget</button>
+        </div>
+
+        <!-- Budget Summary -->
+        <div class="grid grid-3 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon primary">💰</div>
+                <div class="stat-value" id="totalBudget">₹0</div>
+                <div class="stat-label">Total Budget</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">✓</div>
+                <div class="stat-value" id="totalSpent">₹0</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">📊</div>
+                <div class="stat-value" id="remaining">₹0</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+        </div>
+
+        <!-- Budgets List -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="card-icon">📋</span>
+                    Your Budgets
+                </h3>
+            </div>
+            <div id="budgetsList">
+                <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    No budgets yet. Click "Add Budget" to create your first budget.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Budget Modal -->
+    <div id="addBudgetModal" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 500px; width: 90%;">
+            <div class="card-header">
+                <h3 class="card-title">Add New Budget</h3>
+                <button onclick="hideAddBudgetModal()"
+                    style="background: none; border: none; color: var(--text-secondary); font-size: 1.5em; cursor: pointer;">×</button>
+            </div>
+            <form onsubmit="handleAddBudget(event)">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input type="text" class="form-input" id="budgetCategory" placeholder="e.g., Food, Transport"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" class="form-input" id="budgetAmount" placeholder="10000" required min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Period</label>
+                    <select class="form-select" id="budgetPeriod">
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Budget</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        checkAuth();
+
+        async function init() {
+            const user = await loadUserInfo();
+            if (user) {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+                loadBudgets();
+            }
+        }
+
+        async function loadBudgets() {
+            try {
+                const data = await api.getBudgetSummary();
+                if (data.success) {
+                    document.getElementById('totalBudget').textContent = formatCurrency(data.totals.budgeted);
+                    document.getElementById('totalSpent').textContent = formatCurrency(data.totals.spent);
+                    document.getElementById('remaining').textContent = formatCurrency(data.totals.remaining);
+
+                    if (data.summary.length > 0) {
+                        displayBudgets(data.summary);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading budgets:', error);
+            }
+        }
+
+        function displayBudgets(budgets) {
+            const html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Budgeted</th>
+                            <th>Spent</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${budgets.map(budget => {
+                const percentage = Math.min(budget.percentage, 100);
+                const color = percentage > 90 ? 'error' : percentage > 70 ? 'warning' : 'success';
+                return `
+                                <tr>
+                                    <td><span class="badge badge-primary">${budget.category}</span></td>
+                                    <td>${formatCurrency(budget.budgeted)}</td>
+                                    <td>${formatCurrency(budget.spent)}</td>
+                                    <td style="font-weight: 600;">${formatCurrency(budget.remaining)}</td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="flex: 1; height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden;">
+                                                <div style="width: ${percentage}%; height: 100%; background: var(--${color}); transition: width 0.3s ease;"></div>
+                                            </div>
+                                            <span style="font-weight: 600; color: var(--${color});">${percentage.toFixed(0)}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+            }).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('budgetsList').innerHTML = html;
+        }
+
+        function showAddBudgetModal() {
+            document.getElementById('addBudgetModal').classList.remove('hidden');
+        }
+
+        function hideAddBudgetModal() {
+            document.getElementById('addBudgetModal').classList.add('hidden');
+        }
+
+        async function handleAddBudget(event) {
+            event.preventDefault();
+
+            const category = document.getElementById('budgetCategory').value;
+            const amount = parseFloat(document.getElementById('budgetAmount').value);
+            const period = document.getElementById('budgetPeriod').value;
+
+            try {
+                const data = await api.createBudget({ category, amount, period });
+                if (data.success) {
+                    showAlert('Budget created successfully!', 'success');
+                    hideAddBudgetModal();
+                    event.target.reset();
+                    loadBudgets();
+                } else {
+                    showAlert(data.error, 'error');
+                }
+            } catch (error) {
+                showAlert('Failed to create budget', 'error');
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

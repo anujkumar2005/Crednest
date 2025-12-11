@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - CredNest AI</title>
+    <link rel="stylesheet" href="../css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tracker-container {
+            padding: 6rem 2rem 2rem;
+            min-height: 100vh;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            transition: all var(--transition-normal);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .expense-list {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+        }
+
+        .expense-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            transition: all var(--transition-fast);
+        }
+
+        .expense-item:hover {
+            background: var(--glass-bg-hover);
+            transform: translateX(8px);
+        }
+
+        .expense-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .expense-details {
+            flex: 1;
+        }
+
+        .expense-category {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .expense-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .expense-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--error);
+        }
+
+        .add-expense-form {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-btn {
+            padding: 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+        }
+
+        .category-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--crednest-gold);
+        }
+
+        .category-btn.active {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+            border-color: var(--crednest-gold);
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .add-expense-form {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/budgeting" class="navbar-link">Budgeting</a></li>
+                <li><a href="/profile" class="navbar-link">Profile</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tracker-container">
+        <div class="container">
+            <h1 class="text-gradient-gold mb-3">📊 Expense Tracker</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 3rem;">
+                Track your daily expenses and stay within budget
+            </p>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--gradient-gold); box-shadow: var(--glow-gold);">
+                        💰
+                    </div>
+                    <div class="stat-amount text-gradient-gold">₹0</div>
+                    <div class="stat-label">Total Spent This Month</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--gradient-blue); box-shadow: var(--glow-blue);">
+                        📈
+                    </div>
+                    <div class="stat-amount" style="color: var(--crednest-blue);">₹0</div>
+                    <div class="stat-label">Budget Remaining</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--gradient-purple);">
+                        📊
+                    </div>
+                    <div class="stat-amount" style="color: var(--crednest-purple);">0%</div>
+                    <div class="stat-label">Budget Used</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);">
+                        🎯
+                    </div>
+                    <div class="stat-amount" style="color: var(--success);">0</div>
+                    <div class="stat-label">Transactions Today</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="expense-list">
+                    <h2 class="mb-3">Recent Expenses</h2>
+
+                    <div class="expense-item">
+                        <div class="expense-icon" style="background: var(--gradient-gold);">
+                            🍔
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-category">Food & Dining</div>
+                            <div class="expense-desc">Lunch at restaurant</div>
+                        </div>
+                        <div class="expense-amount">- ₹450</div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="expense-icon" style="background: var(--gradient-blue);">
+                            🚗
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-category">Transportation</div>
+                            <div class="expense-desc">Uber ride to office</div>
+                        </div>
+                        <div class="expense-amount">- ₹250</div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="expense-icon" style="background: var(--gradient-purple);">
+                            🛒
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-category">Shopping</div>
+                            <div class="expense-desc">Groceries</div>
+                        </div>
+                        <div class="expense-amount">- ₹1,200</div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="expense-icon"
+                            style="background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);">
+                            💊
+                        </div>
+                        <div class="expense-details">
+                            <div class="expense-category">Healthcare</div>
+                            <div class="expense-desc">Pharmacy</div>
+                        </div>
+                        <div class="expense-amount">- ₹350</div>
+                    </div>
+                </div>
+
+                <div class="add-expense-form">
+                    <h2 class="mb-3">Add New Expense</h2>
+
+                    <form onsubmit="addExpense(event)">
+                        <div class="input-group">
+                            <label class="input-label">Amount (₹)</label>
+                            <input type="number" class="input-field" placeholder="0.00" required id="amount">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Category</label>
+                            <div class="category-grid">
+                                <div class="category-btn" onclick="selectCategory('food')">
+                                    🍔<br><span style="font-size: 0.75rem;">Food</span>
+                                </div>
+                                <div class="category-btn" onclick="selectCategory('transport')">
+                                    🚗<br><span style="font-size: 0.75rem;">Transport</span>
+                                </div>
+                                <div class="category-btn" onclick="selectCategory('shopping')">
+                                    🛒<br><span style="font-size: 0.75rem;">Shopping</span>
+                                </div>
+                                <div class="category-btn" onclick="selectCategory('healthcare')">
+                                    💊<br><span style="font-size: 0.75rem;">Health</span>
+                                </div>
+                                <div class="category-btn" onclick="selectCategory('entertainment')">
+                                    🎬<br><span style="font-size: 0.75rem;">Fun</span>
+                                </div>
+                                <div class="category-btn" onclick="selectCategory('bills')">
+                                    📄<br><span style="font-size: 0.75rem;">Bills</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedCategory" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Description</label>
+                            <input type="text" class="input-field" placeholder="What did you buy?" id="description">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Date</label>
+                            <input type="date" class="input-field" required id="date" value="2025-10-20">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Payment Method</label>
+                            <select class="input-field" id="paymentMethod">
+                                <option>Cash</option>
+                                <option>Credit Card</option>
+                                <option>Debit Card</option>
+                                <option>UPI</option>
+                                <option>Net Banking</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedCat = null;
+
+        function selectCategory(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.category-btn').classList.add('active');
+            document.getElementById('selectedCategory').value = category;
+            selectedCat = category;
+        }
+
+        async function addExpense(e) {
+            e.preventDefault();
+
+            const data = {
+                amount: document.getElementById('amount').value,
+                category: document.getElementById('selectedCategory').value,
+                description: document.getElementById('description').value,
+                date: document.getElementById('date').value,
+                payment_method: document.getElementById('paymentMethod').value
+            };
+
+            if (!data.category) {
+                alert('Please select a category');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/budgeting/add-expense', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Expense added successfully!');
+                    e.target.reset();
+                    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                    location.reload();
+                } else {
+                    alert('Failed to add expense');
+                }
+            } catch (error) {
+                alert('Error adding expense');
+            }
+        }
+    </script>
+</body>
+
+</html>

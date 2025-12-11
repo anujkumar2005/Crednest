@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - CredNest AI</title>
+    <link rel="stylesheet" href="css/crednest-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            animation: fadeIn 1s ease;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border-radius: var(--radius-md);
+            animation: pulse 2s infinite;
+        }
+
+        .stats-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            margin: 4rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard" class="navbar-logo">
+                <span class="navbar-logo-icon">🛡️</span>
+                <span>CredNest AI</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/about" class="navbar-link">About</a></li>
+                <li><a href="/dashboard" class="navbar-link">Dashboard</a></li>
+                <li><a href="/contact" class="navbar-link">Contact</a></li>
+                <li><a href="/dashboard" class="btn btn-primary">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="text-gradient-gold">Welcome to CredNest AI</h1>
+            <p>Your intelligent financial companion that helps you make smarter money decisions. Manage budgets, save
+                better, invest wisely, and access loans with AI-powered guidance.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                <a href="/dashboard" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i> Go to Dashboard
+                </a>
+                <a href="/chat" class="btn btn-secondary">
+                    <i class="fas fa-robot"></i> Try AI Assistant
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="section">
+            <h2 class="text-center mb-5">💎 Why Choose CredNest AI?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: var(--gradient-gold); box-shadow: var(--glow-gold);">
+                        🤖
+                    </div>
+                    <h3>AI-Powered Assistance</h3>
+                    <p>Get instant, intelligent guidance from our AI chatbot trained on financial best practices</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: var(--gradient-blue); box-shadow: var(--glow-blue);">
+                        📊
+                    </div>
+                    <h3>Smart Budgeting</h3>
+                    <p>Track expenses automatically and get insights on where your money goes</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: var(--gradient-purple);">
+                        🏦
+                    </div>
+                    <h3>Bank Comparison</h3>
+                    <p>Compare Top 20 banks for loans with live interest rates and terms</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #00FF88 0%, #00CC70 100%);">
+                        📈
+                    </div>
+                    <h3>Investment Insights</h3>
+                    <p>Explore Top 10 mutual funds with real-time NAV and historical returns</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #FF3B3B 0%, #CC0000 100%);">
+                        🛡️
+                    </div>
+                    <h3>Insurance Guide</h3>
+                    <p>Compare Top 10 insurance companies with claim settlement ratios</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #FFB800 0%, #FF8C00 100%);">
+                        🎯
+                    </div>
+                    <h3>Goal Tracking</h3>
+                    <p>Set and achieve financial goals with progress tracking and reminders</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <h2 class="text-center mb-4">📈 Powered by Real Data</h2>
+            <div class="stats-grid">
+                <div>
+                    <div class="stat-number">20+</div>
+                    <div class="stat-label">Banks Compared</div>
+                </div>
+                <div>
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Insurance Companies</div>
+                </div>
+                <div>
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Investment Funds</div>
+                </div>
+                <div>
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">AI Support</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section text-center">
+            <h2 class="mb-4">🚀 Ready to Take Control of Your Finances?</h2>
+            <p class="mb-4"
+                style="font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem;">
+                Join thousands of users who are managing their money smarter with CredNest AI
+            </p>
+            <a href="/dashboard" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.25rem 3rem;">
+                <i class="fas fa-rocket"></i> Get Started Free
+            </a>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>CredNest AI</h4>
+                    <p>Your smart financial companion</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/dashboard">Dashboard</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CredNest AI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
